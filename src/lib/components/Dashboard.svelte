@@ -1,11 +1,25 @@
 <script lang="ts">
-  import { ShieldCheck, Activity, Cpu, AlertOctagon } from 'lucide-svelte';
+  import { ShieldCheck, Activity, Cpu, AlertOctagon, ShieldAlert } from 'lucide-svelte';
+  import { invoke } from '@tauri-apps/api/core';
   import { store } from '../stores/tweaks.svelte';
 
   let total = $derived(store.tweaks.length);
   let appliedCount = $derived(store.applied.size);
   let info = $derived(store.systemInfo);
   let osLabel = $derived(info?.os_name?.replace('Microsoft ', '') ?? '');
+
+  let elevating = $state(false);
+
+  async function restartAsAdmin() {
+    if (elevating) return;
+    elevating = true;
+    try {
+      await invoke('restart_as_admin');
+    } catch (e) {
+      elevating = false;
+      store.toast({ kind: 'err', msg: `Elevation failed: ${e}` });
+    }
+  }
 </script>
 
 <div class="hero">
@@ -42,6 +56,10 @@
         <div class="icon"><AlertOctagon size={16} strokeWidth={1.75} /></div>
         <div class="value text">Not admin</div>
         <div class="label">Some tweaks will fail</div>
+        <button class="elevate" onclick={restartAsAdmin} disabled={elevating} type="button">
+          <ShieldAlert size={13} strokeWidth={2} />
+          {elevating ? 'Elevating…' : 'Restart as Administrator'}
+        </button>
       </div>
     {/if}
   {/if}
@@ -123,4 +141,29 @@
   }
   .stat.warn .value { color: var(--warning); }
   .stat.warn .icon { color: var(--warning); opacity: 1; }
+
+  .elevate {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 6px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: var(--warning);
+    background: rgba(252,225,0,0.08);
+    border: 1px solid rgba(252,225,0,0.32);
+    border-radius: var(--radius-sm, 6px);
+    cursor: pointer;
+    transition: background-color var(--motion-fast) var(--ease-decel),
+                border-color var(--motion-fast) var(--ease-decel),
+                transform var(--motion-fast) var(--ease-decel);
+  }
+  .elevate:hover:not(:disabled) {
+    background: rgba(252,225,0,0.14);
+    border-color: rgba(252,225,0,0.55);
+  }
+  .elevate:active:not(:disabled) { transform: translateY(1px); }
+  .elevate:disabled { opacity: 0.6; cursor: progress; }
 </style>

@@ -36,8 +36,9 @@ Grab the latest installer from the [**Releases**](https://github.com/jonax1337/r
 
 - `Reclaim_<version>_x64-setup.exe` — NSIS installer (recommended)
 - `Reclaim_<version>_x64_en-US.msi` — MSI installer (for managed deployments)
+- `Reclaim_<version>_x64.exe` — standalone exe, no install (WebView2 required, preinstalled on Windows 11)
 
-**Run as Administrator.** Reclaim needs admin for HKLM writes, service config, and provisioned AppX removal. The Dashboard shows a yellow "Not admin" badge if you forget.
+Reclaim runs without admin rights — but most tweaks need them. HKLM writes, service config, and provisioned AppX removal will fail without elevation. The Dashboard shows a yellow **"Not admin"** badge when you're running unprivileged; close Reclaim and relaunch via **right-click → Run as administrator** to unlock everything.
 
 ---
 

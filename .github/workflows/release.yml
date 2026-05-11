@@ -1,26 +1,30 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Tag to release (e.g. v0.1.0)'
+      version:
+        description: 'Version to release (e.g. 0.1.0 — no v prefix)'
         required: true
         type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
 jobs:
   release:
-    name: Build & draft release (Windows)
+    name: Build & draft release
     runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -39,14 +43,62 @@ jobs:
       - name: Install JS dependencies
         run: npm ci
 
-      - name: Resolve tag
-        id: tag
+      - name: Bump versions to ${{ inputs.version }}
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "name=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          v="${{ inputs.version }}"
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json'));p.version='$v';fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n')"
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json'));p.version='$v';fs.writeFileSync('src-tauri/tauri.conf.json',JSON.stringify(p,null,2)+'\n')"
+          sed -i "0,/^version = \".*\"/{s//version = \"$v\"/}" src-tauri/Cargo.toml
+          (cd src-tauri && cargo update -p reclaim --precise "$v" || cargo generate-lockfile)
+
+      - name: Generate changelog
+        id: changelog
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="v${{ inputs.version }}"
+          prev=$(git tag --sort=-v:refname | grep '^v' | head -n1 || true)
+          if [ -n "$prev" ]; then
+            body=$(gh api "repos/${{ github.repository }}/releases/generate-notes" \
+              -f tag_name="$tag" \
+              -f previous_tag_name="$prev" \
+              -f target_commitish="${{ github.sha }}" \
+              --jq '.body')
           else
-            echo "name=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+            body=$(gh api "repos/${{ github.repository }}/releases/generate-notes" \
+              -f tag_name="$tag" \
+              -f target_commitish="${{ github.sha }}" \
+              --jq '.body')
+          fi
+          {
+            echo 'body<<RELEASE_NOTES_EOF'
+            printf '%s\n' "$body"
+            echo
+            echo '---'
+            echo
+            echo '### Downloads'
+            echo '- `Reclaim_${{ inputs.version }}_x64-setup.exe` — NSIS installer (recommended)'
+            echo '- `Reclaim_${{ inputs.version }}_x64_en-US.msi` — MSI installer (managed deployments)'
+            echo '- `Reclaim_${{ inputs.version }}_x64.exe` — standalone exe, no install (WebView2 required, preinstalled on Win11)'
+            echo
+            echo '> Reclaim runs without admin, but most tweaks need it — relaunch as Administrator to unlock everything.'
+            echo '> Take a system restore point before applying tweaks.'
+            echo 'RELEASE_NOTES_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Commit version bump
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "no version changes to commit"
+          else
+            git commit -m "chore(release): v${{ inputs.version }}"
+            git push
           fi
 
       - name: Build & upload to draft release
@@ -54,19 +106,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ steps.tag.outputs.name }}
-          releaseName: 'Reclaim ${{ steps.tag.outputs.name }}'
-          releaseBody: |
-            ## Reclaim ${{ steps.tag.outputs.name }}
-
-            Windows 11 tweaker — see [README](https://github.com/${{ github.repository }}#readme) for details.
-
-            ### Installers
-            - `Reclaim_<version>_x64-setup.exe` — NSIS installer (recommended)
-            - `Reclaim_<version>_x64_en-US.msi` — MSI installer
-
-            **Run as Administrator.** Take a system restore point before applying tweaks.
-
-            <!-- Edit these notes before publishing. -->
+          tagName: v${{ inputs.version }}
+          releaseName: 'Reclaim v${{ inputs.version }}'
+          releaseBody: ${{ steps.changelog.outputs.body }}
           releaseDraft: true
-          prerelease: false
+          prerelease: ${{ inputs.prerelease }}
+
+      - name: Attach standalone exe
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          v="${{ inputs.version }}"
+          src="src-tauri/target/release/reclaim.exe"
+          dst="Reclaim_${v}_x64.exe"
+          if [ ! -f "$src" ]; then
+            echo "::error::standalone exe not found at $src"
+            ls -la src-tauri/target/release/ || true
+            exit 1
+          fi
+          cp "$src" "$dst"
+          gh release upload "v${v}" "$dst" --clobber --repo "${{ github.repository }}"

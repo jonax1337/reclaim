@@ -35,6 +35,28 @@ pub fn create_restore_point(label: String) -> AppResult<()> {
     system::create_restore_point(&label)
 }
 
+/// Relaunch the current process with elevated privileges. Triggers UAC.
+/// The current (non-elevated) instance exits once the new one is spawned.
+#[tauri::command]
+pub fn restart_as_admin(app: tauri::AppHandle) -> AppResult<()> {
+    let exe = std::env::current_exe()?;
+    let exe_path = exe.to_string_lossy().replace('\'', "''");
+    let ps_cmd = format!("Start-Process -FilePath '{exe_path}' -Verb RunAs");
+
+    let status = std::process::Command::new("powershell.exe")
+        .args(["-NoProfile", "-NonInteractive", "-Command", &ps_cmd])
+        .status()
+        .map_err(|e| AppError::Other(format!("failed to spawn elevated process: {e}")))?;
+
+    if !status.success() {
+        // User likely declined UAC — stay running, surface a clear error.
+        return Err(AppError::Other("elevation declined".into()));
+    }
+
+    app.exit(0);
+    Ok(())
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct ActivityEntry {
     pub id: String,

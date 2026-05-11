@@ -38,6 +38,7 @@ pub fn run() {
             commands::start_service,
             commands::stop_service,
             commands::create_restore_point,
+            commands::restart_as_admin,
             commands::list_activity,
             commands::list_apps_inventory,
             commands::install_known_app,
