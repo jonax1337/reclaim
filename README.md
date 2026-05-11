@@ -6,25 +6,14 @@
 
 A modern, safe Windows 11 tweaker built with **Tauri 2 + Svelte 5** and a **Fluent / Mica** UI.
 
-[![Build](https://github.com/jonax1337/reclaim/actions/workflows/build.yml/badge.svg)](https://github.com/jonax1337/reclaim/actions/workflows/build.yml)
-[![Release](https://github.com/jonax1337/reclaim/actions/workflows/release.yml/badge.svg)](https://github.com/jonax1337/reclaim/actions/workflows/release.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Platform](https://img.shields.io/badge/platform-Windows%2011-0078D4)
-![Tauri](https://img.shields.io/badge/Tauri-2-FFC131?logo=tauri&logoColor=white)
-![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
+[![Build](https://img.shields.io/github/actions/workflow/status/jonax1337/reclaim/build.yml?branch=main&style=for-the-badge&label=build)](https://github.com/jonax1337/reclaim/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/actions/workflow/status/jonax1337/reclaim/release.yml?style=for-the-badge&label=release)](https://github.com/jonax1337/reclaim/actions/workflows/release.yml)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
+![Platform](https://img.shields.io/badge/platform-Windows%2011-0078D4?style=for-the-badge)
+![Tauri](https://img.shields.io/badge/Tauri-2-FFC131?style=for-the-badge&logo=tauri&logoColor=white)
+![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?style=for-the-badge&logo=svelte&logoColor=white)
 
 </div>
-
----
-
-> **Status: v0.1 — early release.** Reverting is best-effort: registry and service tweaks
-> restore cleanly via per-tweak snapshots; AppX removals re-register from on-disk manifests
-> where available. The optional **System Restore Point** taken before a batch apply is the
-> primary safety net — Reclaim's own revert is the convenience layer.
->
-> **Builds on Windows only** (Tauri targets the host OS).
-
----
 
 ## Features
 
@@ -91,92 +80,6 @@ npm run tauri build
 
 ---
 
-## Project layout
-
-```
-win-tweak/
-├── src/                           # Svelte 5 frontend
-│   ├── app.css                    # Fluent design tokens (Mica-aware)
-│   ├── lib/
-│   │   ├── components/            # TitleBar, Sidebar, TweakCard, ApplyBar, …
-│   │   ├── stores/tweaks.svelte.ts
-│   │   └── types.ts
-│   └── routes/+page.svelte
-├── src-tauri/
-│   ├── Cargo.toml
-│   ├── tauri.conf.json            # window: transparent + Mica
-│   ├── capabilities/default.json
-│   ├── tweaks/                    # declarative catalog (TOML + apps.json)
-│   └── src/
-│       ├── lib.rs                 # Tauri entry, plugin registration
-│       ├── commands.rs            # invoke surface
-│       ├── catalog.rs             # tweak schema + loader
-│       ├── registry.rs            # winreg ops + snapshot/restore
-│       ├── services.rs            # sc.exe wrapper
-│       ├── appx.rs                # PowerShell appx remove/reinstall
-│       ├── powershell.rs          # safe ps spawn
-│       ├── system.rs              # version + restore points
-│       ├── backup.rs              # per-tweak undo journal
-│       └── error.rs
-├── .github/workflows/             # CI build + tag-triggered release
-├── LICENSE
-└── README.md
-```
-
----
-
-## Adding a tweak
-
-1. Open the matching file in `src-tauri/tweaks/` (or create `mything.toml` and add it to `TWEAK_FILES` in `catalog.rs`).
-2. Append a TOML block:
-
-   ```toml
-   [[tweak]]
-   id = "explorer.show-seconds-clock"
-   name = "Show Seconds on Taskbar Clock"
-   description = "Reveals seconds on the system clock."
-   category = "explorer"
-   severity = "safe"
-   presets = ["recommended"]
-   [[tweak.registry]]
-   hive = "HKCU"
-   path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
-   name = "ShowSecondsInSystemClock"
-   kind = "dword"
-   value = 1
-   ```
-
-3. Rebuild — the catalogue is embedded with `include_str!`.
-
----
-
-## Releasing
-
-Releases are produced by `.github/workflows/release.yml`, triggered by pushing a `v*.*.*` tag:
-
-```powershell
-git tag v0.1.0
-git push origin v0.1.0
-```
-
-The workflow builds NSIS + MSI installers on a Windows runner and uploads them to a **draft GitHub Release** — review the draft, edit notes, and publish from the Releases page when ready.
-
----
-
-## Design system
-
-Colors and tokens live in `src/app.css`:
-
-- **Surfaces** are translucent so the **Mica** background shines through.
-- **Accent**: Win11 dark accent `#60cdff`.
-- **Severity**: Safe `#6ccb5f`, Caution `#fce100`, Risky `#ff99a4`.
-- **Typography**: Segoe UI Variable (Win11 system font) → falls back to Inter.
-- **Motion**: 100/200/350 ms with Fluent `cubic-bezier(0.10, 0.90, 0.20, 1.00)`.
-
-Components follow Fluent rules: 1 px subtle strokes, 4/8/12 px radii, hover-only state on translucent overlays, an animated 16 px accent indicator on the active sidebar item, focus ring 2 px outside.
-
----
-
 ## Safety notes
 
 - This tool only writes to **registry**, **services**, and **AppX**. It **never** disables Defender, SmartScreen, or update services — that is where other debloaters have caused real damage.
@@ -188,11 +91,7 @@ Components follow Fluent rules: 1 px subtle strokes, 4/8/12 px radii, hover-only
 
 ## Contributing
 
-Issues and PRs welcome — especially:
-
-- New tweaks (just a TOML block, see above)
-- Build-version gating (`min_build` / `max_build`) for tweaks that only apply to specific Windows 11 feature updates
-- Translations of tweak names/descriptions
+Issues and PRs welcome. New tweaks are declared as TOML in `src-tauri/tweaks/` — open any of the existing files (`privacy.toml`, `explorer.toml`, …) to see the schema, copy a block, and adjust `id`, `name`, `description`, `severity`, and the registry/service/appx targets. Translations and build-version gating (`min_build` / `max_build`) are also appreciated.
 
 Please run `npm run check` and `cargo fmt` before opening a PR.
 
