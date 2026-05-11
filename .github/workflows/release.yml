@@ -72,6 +72,7 @@ jobs:
               -f target_commitish="${{ github.sha }}" \
               --jq '.body')
           fi
+          v="${{ inputs.version }}"
           {
             echo 'body<<RELEASE_NOTES_EOF'
             printf '%s\n' "$body"
@@ -79,9 +80,11 @@ jobs:
             echo '---'
             echo
             echo '### Downloads'
-            echo '- `Reclaim_${{ inputs.version }}_x64-setup.exe` — NSIS installer (recommended)'
-            echo '- `Reclaim_${{ inputs.version }}_x64_en-US.msi` — MSI installer (managed deployments)'
-            echo '- `Reclaim_${{ inputs.version }}_x64.exe` — standalone exe, no install (WebView2 required, preinstalled on Win11)'
+            echo "- \`Reclaim_${v}_x64-setup.exe\` — NSIS installer (recommended)"
+            if [[ "$v" != *-* ]]; then
+              echo "- \`Reclaim_${v}_x64_en-US.msi\` — MSI installer (managed deployments)"
+            fi
+            echo "- \`Reclaim_${v}_x64.exe\` — standalone exe, no install (WebView2 required, preinstalled on Win11)"
             echo
             echo '> Reclaim runs without admin, but most tweaks need it — relaunch as Administrator to unlock everything.'
             echo '> Take a system restore point before applying tweaks.'
@@ -111,6 +114,9 @@ jobs:
           releaseBody: ${{ steps.changelog.outputs.body }}
           releaseDraft: true
           prerelease: ${{ inputs.prerelease }}
+          # MSI rejects non-numeric pre-release identifiers (e.g. -beta).
+          # Skip MSI when the version has a suffix; ship NSIS + standalone exe only.
+          args: ${{ contains(inputs.version, '-') && '--bundles nsis' || '' }}
 
       - name: Attach standalone exe
         shell: bash
