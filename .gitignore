@@ -1,13 +1,11 @@
 node_modules
 /build
 /.svelte-kit
-/package-lock.json
 /yarn.lock
 /pnpm-lock.yaml
 
 # Tauri
 /src-tauri/target
-/src-tauri/Cargo.lock
 /src-tauri/gen/schemas
 
 # IDE
