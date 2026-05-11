@@ -1,0 +1,56 @@
+# Performance tweaks.
+
+[[tweak]]
+id = "perf.visual-effects-best-perf"
+name = "Visual Effects: Best Performance"
+description = "Switches the system to 'Adjust for best performance' (disables animations, shadows, smooth scrolling)."
+category = "performance"
+severity = "safe"
+presets = ["aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects"
+name = "VisualFXSetting"
+kind = "dword"
+value = 2
+
+[[tweak]]
+id = "perf.disable-startup-delay"
+name = "Disable Startup App Delay"
+description = "Removes the artificial delay added to startup applications."
+category = "performance"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize"
+name = "StartupDelayInMSec"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "perf.power-plan-ultimate"
+name = "Enable Ultimate Performance Power Plan"
+description = "Activates the hidden 'Ultimate Performance' power plan. Best for desktops on AC power."
+category = "performance"
+severity = "caution"
+presets = ["aggressive"]
+warning = "Increases power draw. Don't enable on a laptop running on battery."
+ps_apply = """
+$plan = (powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61) 2>$null
+powercfg /setactive e9a42b02-d5df-448d-aa00-03f14749eb61
+"""
+
+[[tweak]]
+id = "perf.disable-game-bar-tips"
+name = "Disable Game Bar Tips"
+description = "Disables the Game DVR tips that pop up in fullscreen apps."
+category = "gaming"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\GameBar"
+name = "ShowStartupPanel"
+kind = "dword"
+value = 0

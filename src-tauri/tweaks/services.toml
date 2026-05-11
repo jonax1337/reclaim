@@ -1,0 +1,48 @@
+# Service tweaks. WinUtil's "Essential Tweaks - Services" set.
+
+[[tweak]]
+id = "svc.disable-remote-registry"
+name = "Disable Remote Registry"
+description = "Disables the Remote Registry service to reduce attack surface."
+category = "services"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.services]]
+name = "RemoteRegistry"
+startup = "disabled"
+stop = true
+
+[[tweak]]
+id = "svc.disable-ics"
+name = "Disable Internet Connection Sharing (ICS)"
+description = "Disables ICS — only useful if you tether your PC."
+category = "services"
+severity = "safe"
+presets = ["aggressive"]
+[[tweak.services]]
+name = "SharedAccess"
+startup = "disabled"
+stop = true
+
+[[tweak]]
+id = "svc.maps-broker-manual"
+name = "Set Maps Broker to Manual"
+description = "Stops the Maps update service from running unless explicitly needed."
+category = "services"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.services]]
+name = "MapsBroker"
+startup = "manual"
+
+[[tweak]]
+id = "svc.disable-offline-files"
+name = "Disable Offline Files"
+description = "Disables the CSC service used by the Offline Files feature."
+category = "services"
+severity = "caution"
+presets = ["aggressive"]
+warning = "Don't disable if you use Folder Redirection / Offline Files in a domain environment."
+[[tweak.services]]
+name = "CscService"
+startup = "disabled"

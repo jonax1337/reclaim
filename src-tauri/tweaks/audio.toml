@@ -1,0 +1,40 @@
+# Audio tweaks.
+
+[[tweak]]
+id = "audio.disable-communications-ducking"
+name = "Disable Communications Ducking"
+description = "Stops Windows from auto-lowering other sounds when it detects a call. Critical for streamers."
+category = "audio"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Multimedia\\Audio"
+name = "UserDuckingPreference"
+kind = "dword"
+value = 3
+
+[[tweak]]
+id = "audio.disable-startup-jingle"
+name = "Disable Logon Sound Scheme"
+description = "Removes the .Default sound from the WindowsLogon scheme. Quieter logons."
+category = "audio"
+severity = "safe"
+presets = ["aggressive"]
+ps_apply = """
+Set-ItemProperty -Path 'HKCU:\\AppEvents\\Schemes\\Apps\\.Default\\WindowsLogon\\.Current' -Name '(Default)' -Value '' -Force
+"""
+
+[[tweak]]
+id = "audio.disable-system-beep"
+name = "Disable System Beep"
+description = "Kills the built-in motherboard speaker beep that occasionally fires on error."
+category = "audio"
+severity = "safe"
+presets = []
+[[tweak.registry]]
+hive = "HKCU"
+path = "Control Panel\\Sound"
+name = "Beep"
+kind = "string"
+value = "no"

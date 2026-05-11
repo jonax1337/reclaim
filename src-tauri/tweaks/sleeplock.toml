@@ -1,0 +1,43 @@
+# Lock screen / sleep tweaks. Live under the existing "performance" category.
+
+[[tweak]]
+id = "perf.disable-lockscreen-notifications"
+name = "Disable Lock Screen Notifications"
+description = "Stops notifications from showing while the device is locked."
+category = "performance"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Notifications\\Settings"
+name = "NOC_GLOBAL_SETTING_ALLOW_NOTIFICATIONS_ON_LOCKSCREEN"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "perf.disable-lock-screen-entirely"
+name = "Skip Lock Screen Entirely"
+description = "Sign-in screen appears immediately on wake — no swipe / dismiss step."
+category = "performance"
+severity = "safe"
+presets = []
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization"
+name = "NoLockScreen"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "perf.disable-screensaver-lock"
+name = "Don't Lock on Screensaver"
+description = "Removes the 'On resume, display logon screen' behaviour."
+category = "performance"
+severity = "safe"
+presets = []
+[[tweak.registry]]
+hive = "HKCU"
+path = "Control Panel\\Desktop"
+name = "ScreenSaverIsSecure"
+kind = "string"
+value = "0"

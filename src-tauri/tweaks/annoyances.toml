@@ -1,0 +1,113 @@
+# Win11 24H2 / 25H2 specific annoyances.
+
+[[tweak]]
+id = "anno.disable-bitlocker-auto-encrypt"
+name = "Stop Automatic BitLocker Encryption"
+description = "24H2+ silently encrypts your system drive on Home. This stops it. Apply BEFORE first sign-in to be effective."
+category = "annoyances"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+min_build = 26100
+warning = "Already-encrypted drives are not decrypted by this tweak. Use manage-bde -off for that."
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Control\\BitLocker"
+name = "PreventDeviceEncryption"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "anno.disable-suggested-actions"
+name = "Disable Suggested Actions (Copy)"
+description = "Removes the 'Open call' / 'Add to calendar' floaters that appear when you copy a number / date."
+category = "annoyances"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\Shell\\SuggestedActions"
+name = "DisabledSuggestedActions"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "anno.disable-welcome-experience"
+name = "Disable 'Get the most out of Windows' Prompts"
+description = "Stops the 'Set up your device' / 'Finish setting up' nags after updates."
+category = "annoyances"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-310093Enabled"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\UserProfileEngagement"
+name = "ScoobeSystemSettingEnabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "anno.disable-msa-nag"
+name = "Disable Microsoft Account Sign-in Nag"
+description = "Stops the 'Sign in with a Microsoft account' prompt in Settings."
+category = "annoyances"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\System"
+name = "NoMSAccountAdvertisement"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "anno.disable-hello-nag"
+name = "Disable Windows Hello Pin Suggestion"
+description = "Stops the periodic 'Set up Windows Hello' suggestion."
+category = "annoyances"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\PassportForWork"
+name = "Enabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "anno.disable-edge-news-and-interests"
+name = "Disable News & Interests Taskbar"
+description = "Removes the weather widget thingy that occasionally appears on the taskbar."
+category = "annoyances"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Feeds"
+name = "EnableFeeds"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Feeds"
+name = "ShellFeedsTaskbarViewMode"
+kind = "dword"
+value = 2
+
+[[tweak]]
+id = "anno.disable-startup-sound"
+name = "Disable Windows Startup Sound"
+description = "Mutes the chime on cold boot."
+category = "annoyances"
+severity = "safe"
+presets = ["aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Authentication\\LogonUI\\BootAnimation"
+name = "DisableStartupSound"
+kind = "dword"
+value = 1

@@ -1,0 +1,106 @@
+# Privacy & telemetry tweaks. Sources: Win11Debloat Regfiles/, Sophia-Script, ChrisTitusTech/winutil.
+
+[[tweak]]
+id = "privacy.disable-telemetry"
+name = "Disable Diagnostic Data (Telemetry)"
+description = "Sets AllowTelemetry to 0 in HKLM and disables Connected User Experiences."
+category = "privacy"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection"
+name = "AllowTelemetry"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\DataCollection"
+name = "AllowTelemetry"
+kind = "dword"
+value = 0
+[[tweak.services]]
+name = "DiagTrack"
+startup = "disabled"
+stop = true
+[[tweak.services]]
+name = "dmwappushservice"
+startup = "disabled"
+stop = true
+
+[[tweak]]
+id = "privacy.disable-advertising-id"
+name = "Disable Advertising ID"
+description = "Stops apps from using your advertising ID for personalised ads."
+category = "privacy"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo"
+name = "Enabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "privacy.disable-tailored-experiences"
+name = "Disable Tailored Experiences"
+description = "Stops Microsoft from using diagnostic data for personalised tips, ads and recommendations."
+category = "privacy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Privacy"
+name = "TailoredExperiencesWithDiagnosticDataEnabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "privacy.disable-activity-history"
+name = "Disable Activity History"
+description = "Disables the Timeline / Activity History feed sent to Microsoft."
+category = "privacy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\System"
+name = "PublishUserActivities"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\System"
+name = "EnableActivityFeed"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "privacy.disable-feedback"
+name = "Disable Feedback Requests"
+description = "Stops Windows from periodically asking for feedback via the SIUF."
+category = "privacy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "SOFTWARE\\Microsoft\\Siuf\\Rules"
+name = "NumberOfSIUFInPeriod"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "privacy.disable-location-tracking"
+name = "Disable Location Tracking"
+description = "Denies the Windows Location service. Apps that genuinely need location (Maps, Weather) will stop working."
+category = "privacy"
+severity = "caution"
+presets = ["aggressive"]
+warning = "Maps, Weather and similar apps will lose location access."
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\location"
+name = "Value"
+kind = "string"
+value = "Deny"

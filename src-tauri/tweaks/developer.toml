@@ -1,0 +1,98 @@
+# Quality-of-life tweaks for developers / power users.
+
+[[tweak]]
+id = "dev.enable-dev-mode"
+name = "Enable Developer Mode"
+description = "Allows running unsigned UWP apps and enables developer-relevant features (loose file install)."
+category = "developer"
+severity = "safe"
+presets = []
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock"
+name = "AllowDevelopmentWithoutDevLicense"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock"
+name = "AllowAllTrustedApps"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "dev.enable-long-paths"
+name = "Enable Long Paths (260+ chars)"
+description = "Removes the 260-character path limit. Required for some Node / Rust projects."
+category = "developer"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Control\\FileSystem"
+name = "LongPathsEnabled"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "dev.show-clock-seconds"
+name = "Show Seconds on Taskbar Clock"
+description = "Useful for timing builds and watching countdowns."
+category = "developer"
+severity = "safe"
+presets = []
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
+name = "ShowSecondsInSystemClock"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "dev.force-dark-apps"
+name = "Force Dark Mode for Apps"
+description = "Forces UWP / WinUI apps to dark theme regardless of accent settings."
+category = "developer"
+severity = "safe"
+presets = []
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"
+name = "AppsUseLightTheme"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"
+name = "SystemUsesLightTheme"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "dev.show-full-path"
+name = "Show Full Path in Explorer Title Bar"
+description = "Replaces the bare folder name with the full path. Mac-like."
+category = "developer"
+severity = "safe"
+presets = []
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CabinetState"
+name = "FullPath"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "dev.show-protected-os-files"
+name = "Show Protected OS Files"
+description = "Stops Explorer from hiding protected operating-system files. Useful for poking around, dangerous otherwise."
+category = "developer"
+severity = "caution"
+presets = []
+warning = "You can now break Windows by deleting the wrong file. Treat this like sudo."
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
+name = "ShowSuperHidden"
+kind = "dword"
+value = 1

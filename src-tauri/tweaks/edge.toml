@@ -1,0 +1,132 @@
+# Edge debloating — strip the rebloat that Microsoft pushes back in via updates.
+# All via Edge policy registry, so they survive Edge auto-updates.
+
+[[tweak]]
+id = "edge.disable-first-run"
+name = "Skip Edge First-Run Experience"
+description = "No 'Welcome to Edge' on first launch. Survives updates."
+category = "edge"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "HideFirstRunExperience"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "edge.disable-background"
+name = "Disable Edge Background Processes"
+description = "Stops Edge from staying resident after you close the last window."
+category = "edge"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "BackgroundModeEnabled"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "StartupBoostEnabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "edge.disable-shopping"
+name = "Disable Sponsored Shopping"
+description = "Removes the 'Save with…' shopping notifications and price-tracking overlays."
+category = "edge"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "EdgeShoppingAssistantEnabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "edge.disable-bing-suggestions"
+name = "Disable Bing Suggestions in Address Bar"
+description = "Stops Edge from sending every keystroke to Bing while you type."
+category = "edge"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "SearchSuggestEnabled"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "AddressBarMicrosoftSearchInBingProviderEnabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "edge.disable-copilot-sidebar"
+name = "Disable Edge Copilot Sidebar"
+description = "Removes the Copilot button and the right-side AI sidebar."
+category = "edge"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "HubsSidebarEnabled"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "CopilotPageContext"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "edge.disable-ai-composer"
+name = "Disable Edge Compose / AI Writing"
+description = "Disables the 'Compose with AI' context menu inline writing helper."
+category = "edge"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "ComposeInlineEnabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "edge.hide-rewards-discover"
+name = "Hide Rewards / Discover"
+description = "Removes the 'Discover' / Microsoft Rewards buttons from the toolbar."
+category = "edge"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "ShowMicrosoftRewards"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "edge.disable-mini-menu"
+name = "Disable Edge Mini Menu on Text Select"
+description = "Stops the floating mini-menu that pops up whenever you highlight text."
+category = "edge"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "EdgeMiniMenuEnabled"
+kind = "dword"
+value = 0

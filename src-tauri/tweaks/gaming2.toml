@@ -1,0 +1,109 @@
+# Real gaming tweaks — DVR off, GPU scheduling, mouse acceleration.
+
+[[tweak]]
+id = "game.disable-dvr-fully"
+name = "Disable Game DVR Fully"
+description = "Disables Game DVR background capture + auto-recording + the policy. Big FPS win on some setups."
+category = "gaming"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "System\\GameConfigStore"
+name = "GameDVR_Enabled"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKCU"
+path = "System\\GameConfigStore"
+name = "GameDVR_FSEBehaviorMode"
+kind = "dword"
+value = 2
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR"
+name = "AllowGameDVR"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Services\\xbgm"
+name = "Start"
+kind = "dword"
+value = 4
+
+[[tweak]]
+id = "game.gpu-scheduling-on"
+name = "Hardware-Accelerated GPU Scheduling"
+description = "Enables HAGS — lets the GPU manage its own VRAM. Requires reboot. Compatible drivers needed."
+category = "gaming"
+severity = "caution"
+presets = ["aggressive"]
+warning = "On some setups HAGS causes stutter rather than fixing it. Test before keeping."
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers"
+name = "HwSchMode"
+kind = "dword"
+value = 2
+
+[[tweak]]
+id = "game.disable-mouse-accel"
+name = "Disable Mouse Acceleration"
+description = "Removes the Windows mouse smoothing curve — what every FPS player wants."
+category = "gaming"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Control Panel\\Mouse"
+name = "MouseSpeed"
+kind = "string"
+value = "0"
+[[tweak.registry]]
+hive = "HKCU"
+path = "Control Panel\\Mouse"
+name = "MouseThreshold1"
+kind = "string"
+value = "0"
+[[tweak.registry]]
+hive = "HKCU"
+path = "Control Panel\\Mouse"
+name = "MouseThreshold2"
+kind = "string"
+value = "0"
+
+[[tweak]]
+id = "game.disable-nagle"
+name = "Disable Nagle's Algorithm (Gaming Network)"
+description = "Sets TcpAckFrequency = 1 + TCPNoDelay = 1 on every adapter — better latency for online games at the cost of bandwidth efficiency."
+category = "gaming"
+severity = "caution"
+presets = []
+warning = "Not always a win. Test online — some routers / ISPs prefer the default."
+ps_apply = """
+Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces' | ForEach-Object {
+    Set-ItemProperty -Path $_.PSPath -Name TcpAckFrequency -Value 1 -Type DWord -Force
+    Set-ItemProperty -Path $_.PSPath -Name TCPNoDelay -Value 1 -Type DWord -Force
+}
+"""
+ps_revert = """
+Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces' | ForEach-Object {
+    Remove-ItemProperty -Path $_.PSPath -Name TcpAckFrequency -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path $_.PSPath -Name TCPNoDelay -ErrorAction SilentlyContinue
+}
+"""
+
+[[tweak]]
+id = "game.clear-dx-shader-cache"
+name = "Clear DirectX Shader Cache"
+description = "One-shot purge of the DX shader cache. Fixes corrupt shader stutters; first launch after will rebuild."
+category = "gaming"
+severity = "safe"
+presets = []
+ps_apply = """
+Remove-Item -LiteralPath "$env:LOCALAPPDATA\\D3DSCache" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath "$env:LOCALAPPDATA\\NVIDIA\\DXCache" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath "$env:LOCALAPPDATA\\NVIDIA\\GLCache" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath "$env:LOCALAPPDATA\\AMD\\DxCache" -Recurse -Force -ErrorAction SilentlyContinue
+"""

@@ -1,0 +1,99 @@
+# Surgical removes. All Risky — needs explicit confirmation.
+
+[[tweak]]
+id = "bloat.uninstall-edge"
+name = "Uninstall Microsoft Edge (surgical)"
+description = "Runs Edge's own setup.exe with --uninstall --system-level --force-uninstall — the only path that survives Microsoft's reinstall logic."
+category = "bloatware"
+severity = "risky"
+presets = []
+warning = "Some Windows apps embed Edge WebView. Most still work because WebView2 Runtime is separate, but YMMV."
+ps_apply = """
+$paths = @(
+    "$env:ProgramFiles(x86)\\Microsoft\\Edge\\Application",
+    "$env:ProgramFiles\\Microsoft\\Edge\\Application"
+)
+foreach ($p in $paths) {
+    if (Test-Path $p) {
+        $verDir = Get-ChildItem -LiteralPath $p -Directory | Where-Object { $_.Name -match '^\\d' } | Sort-Object Name -Descending | Select-Object -First 1
+        if ($verDir) {
+            $setup = Join-Path $verDir.FullName 'Installer\\setup.exe'
+            if (Test-Path $setup) {
+                & $setup --uninstall --system-level --force-uninstall --verbose-logging --do-not-launch-chrome 2>&1 | Out-Null
+            }
+        }
+    }
+}
+# Block reinstall via update policy.
+New-Item -Path 'HKLM:\\SOFTWARE\\Microsoft\\EdgeUpdate' -Force | Out-Null
+Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\EdgeUpdate' -Name 'DoNotUpdateToEdgeWithChromium' -Value 1 -Type DWord -Force
+"""
+ps_revert = """
+Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\EdgeUpdate' -Name 'DoNotUpdateToEdgeWithChromium' -ErrorAction SilentlyContinue
+# Reinstall: easiest is to let Windows Update bring it back, or use winget:
+& winget install --id Microsoft.Edge --silent --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
+"""
+
+[[tweak]]
+id = "bloat.uninstall-onedrive"
+name = "Uninstall OneDrive (surgical)"
+description = "Kills OneDrive, runs the bundled uninstaller, removes the Explorer namespace entries and scheduled tasks."
+category = "bloatware"
+severity = "risky"
+presets = []
+warning = "If you use OneDrive: don't apply. This makes the integration gone — files in your OneDrive folder stay locally but stop syncing."
+ps_apply = """
+taskkill /f /im OneDrive.exe 2>$null
+$paths = @("$env:SystemRoot\\System32\\OneDriveSetup.exe", "$env:SystemRoot\\SysWOW64\\OneDriveSetup.exe")
+foreach ($p in $paths) { if (Test-Path $p) { & $p /uninstall | Out-Null } }
+# Strip the Explorer namespace entry.
+Remove-Item -Path 'HKCR:\\CLSID\\{018D5C66-4533-4307-9B53-224DE2ED1FE6}' -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path 'HKCR:\\Wow6432Node\\CLSID\\{018D5C66-4533-4307-9B53-224DE2ED1FE6}' -Recurse -Force -ErrorAction SilentlyContinue
+# Disable for future user profiles too.
+New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\OneDrive' -Force | Out-Null
+Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\OneDrive' -Name 'DisableFileSyncNGSC' -Value 1 -Type DWord -Force
+"""
+ps_revert = """
+Remove-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\OneDrive' -Name 'DisableFileSyncNGSC' -ErrorAction SilentlyContinue
+& winget install --id Microsoft.OneDrive --silent --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
+"""
+
+[[tweak]]
+id = "bloat.uninstall-teams-personal"
+name = "Uninstall Teams Personal + Block Reinstall"
+description = "Removes the consumer Teams chat that pins itself to the taskbar."
+category = "bloatware"
+severity = "caution"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Communications"
+name = "ConfigureChatAutoInstall"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
+name = "TaskbarMn"
+kind = "dword"
+value = 0
+[[tweak.appx]]
+package = "MicrosoftTeams"
+[[tweak.appx]]
+package = "MSTeams"
+
+[[tweak]]
+id = "bloat.disable-cortana-svc"
+name = "Disable Cortana Service"
+description = "Sets the Cortana scheduled task + AppX to disabled so it never wakes up."
+category = "bloatware"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.appx]]
+package = "Microsoft.549981C3F5F10"
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search"
+name = "AllowCortana"
+kind = "dword"
+value = 0

@@ -1,0 +1,70 @@
+# Defensive hardening — opposite direction of most tweaks.
+
+[[tweak]]
+id = "sec.enable-dep-all"
+name = "Enable DEP for All Programs"
+description = "Forces Data Execution Prevention on every process — not just opt-ins."
+category = "security"
+severity = "caution"
+presets = []
+warning = "Some old apps refuse to start under AlwaysOn. Test before keeping."
+ps_apply = "bcdedit /set nx AlwaysOn"
+ps_revert = "bcdedit /set nx OptIn"
+
+[[tweak]]
+id = "sec.lsa-protection"
+name = "Enable LSA Protection (RunAsPPL)"
+description = "Makes the LSA process a Protected Process — blocks credential dumping from Mimikatz-class tools."
+category = "security"
+severity = "caution"
+presets = []
+warning = "Some auth providers (older smart-card middleware, certain VPNs) can stop working."
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Control\\Lsa"
+name = "RunAsPPL"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Control\\Lsa"
+name = "RunAsPPLBoot"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "sec.disable-wsh"
+name = "Disable Windows Script Host"
+description = "Blocks .vbs / .wsf / .js execution via wscript/cscript — a common malware delivery path."
+category = "security"
+severity = "caution"
+presets = []
+warning = "Breaks legitimate vbs / js scripts. Power-user toggle."
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\Windows Script Host\\Settings"
+name = "Enabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "sec.disable-wpad"
+name = "Disable WPAD"
+description = "Disables Web Proxy Auto-Discovery, which can be poisoned via LLMNR/NBT-NS spoofing."
+category = "security"
+severity = "safe"
+presets = ["recommended"]
+[[tweak.services]]
+name = "WinHttpAutoProxySvc"
+startup = "disabled"
+stop = true
+
+[[tweak]]
+id = "sec.disable-smb1"
+name = "Disable SMBv1 Protocol"
+description = "Removes the SMB 1.0 client and server. Required to be off in any modern compliance regime."
+category = "security"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+ps_apply = "Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol -NoRestart -ErrorAction SilentlyContinue"
+ps_revert = "Enable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol -NoRestart -ErrorAction SilentlyContinue"

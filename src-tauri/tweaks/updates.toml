@@ -1,0 +1,154 @@
+# Windows Update tweaks. Most are policies under HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate
+# Use carefully — disabling updates entirely is a security risk.
+
+[[tweak]]
+id = "wu.disable-auto-restart"
+name = "No Auto-Restart with Logged-On Users"
+description = "Stops Windows from rebooting on its own while a user is signed in to install updates."
+category = "updates"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU"
+name = "NoAutoRebootWithLoggedOnUsers"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "wu.notify-before-download"
+name = "Notify Before Downloading Updates"
+description = "Switches Auto Update to 'Notify before download' (mode 2) instead of automatic install."
+category = "updates"
+severity = "caution"
+presets = ["aggressive"]
+warning = "You'll need to manually approve every update — including security patches."
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU"
+name = "AUOptions"
+kind = "dword"
+value = 2
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU"
+name = "NoAutoUpdate"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "wu.defer-feature-updates-365"
+name = "Defer Feature Updates by 365 Days"
+description = "Holds back the next big Windows release (24H2 → 25H2 etc.) for one year."
+category = "updates"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate"
+name = "DeferFeatureUpdates"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate"
+name = "DeferFeatureUpdatesPeriodInDays"
+kind = "dword"
+value = 365
+
+[[tweak]]
+id = "wu.defer-quality-updates-7"
+name = "Defer Quality Updates by 7 Days"
+description = "Delays cumulative monthly patches by a week so others find the bugs first."
+category = "updates"
+severity = "safe"
+presets = ["recommended"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate"
+name = "DeferQualityUpdates"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate"
+name = "DeferQualityUpdatesPeriodInDays"
+kind = "dword"
+value = 7
+
+[[tweak]]
+id = "wu.disable-driver-updates"
+name = "Exclude Drivers from Windows Update"
+description = "Stops Windows Update from shipping driver updates — keep the ones from your vendor."
+category = "updates"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate"
+name = "ExcludeWUDriversInQualityUpdate"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "wu.metered-defer"
+name = "Treat WiFi as Metered"
+description = "Marks ethernet/WiFi as metered so Windows pauses non-critical downloads."
+category = "updates"
+severity = "caution"
+presets = ["aggressive"]
+warning = "Some Store apps will pause downloads."
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\NetworkList\\DefaultMediaCost"
+name = "Ethernet"
+kind = "dword"
+value = 2
+
+[[tweak]]
+id = "wu.disable-restart-notifications"
+name = "Disable Restart Notifications"
+description = "Hides 'Restart now to finish updates' nags."
+category = "updates"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU"
+name = "RestartNotificationsAllowed2"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "wu.active-hours-8-22"
+name = "Active Hours: 08:00 – 22:00"
+description = "Tells Windows your machine is in use 08–22 so it won't reboot during that window."
+category = "updates"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\WindowsUpdate\\UX\\Settings"
+name = "ActiveHoursStart"
+kind = "dword"
+value = 8
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\WindowsUpdate\\UX\\Settings"
+name = "ActiveHoursEnd"
+kind = "dword"
+value = 22
+
+[[tweak]]
+id = "wu.disable-store-auto-update"
+name = "Disable Auto-Update for Store Apps"
+description = "Stops the Microsoft Store from updating UWP apps in the background."
+category = "updates"
+severity = "safe"
+presets = ["aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\WindowsStore"
+name = "AutoDownload"
+kind = "dword"
+value = 2

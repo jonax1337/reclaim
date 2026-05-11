@@ -1,0 +1,65 @@
+# Power tweaks. Most useful on desktops on AC power.
+
+[[tweak]]
+id = "power.disable-hibernate"
+name = "Disable Hibernation"
+description = "Frees the gigabytes hiberfil.sys consumes and disables hybrid sleep. Use on desktops."
+category = "power"
+severity = "caution"
+presets = ["aggressive"]
+warning = "Don't apply on laptops — you lose hybrid sleep and fast-startup."
+ps_apply = "powercfg /hibernate off"
+ps_revert = "powercfg /hibernate on"
+
+[[tweak]]
+id = "power.disable-fast-startup"
+name = "Disable Fast Startup"
+description = "Forces a clean cold boot — fixes weird driver / dual-boot issues and stale state."
+category = "power"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power"
+name = "HiberbootEnabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "power.disable-usb-selective-suspend"
+name = "Disable USB Selective Suspend (AC)"
+description = "Stops Windows from putting your USB peripherals to sleep on the active power plan."
+category = "power"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+ps_apply = "powercfg /setacvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0; powercfg /setactive SCHEME_CURRENT"
+ps_revert = "powercfg /setacvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 1; powercfg /setactive SCHEME_CURRENT"
+
+[[tweak]]
+id = "power.disable-pcie-link-mgmt"
+name = "Disable PCIe Link Power Management (AC)"
+description = "Sets PCIe ASPM to maximum performance — fewer micro-stutters at the cost of a few watts."
+category = "power"
+severity = "safe"
+presets = ["aggressive"]
+ps_apply = "powercfg /setacvalueindex SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 0; powercfg /setactive SCHEME_CURRENT"
+ps_revert = "powercfg /setacvalueindex SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 2; powercfg /setactive SCHEME_CURRENT"
+
+[[tweak]]
+id = "power.no-disk-sleep"
+name = "Never Spin Down Disks (AC)"
+description = "Prevents the storage subsystem from spinning down on AC — useful for HDD-heavy setups."
+category = "power"
+severity = "safe"
+presets = ["aggressive"]
+ps_apply = "powercfg /setacvalueindex SCHEME_CURRENT 0012ee47-9041-4b5d-9b77-535fba8b1442 6738e2c4-e8a5-4a42-b16a-e040e769756e 0; powercfg /setactive SCHEME_CURRENT"
+
+[[tweak]]
+id = "power.no-monitor-sleep"
+name = "Never Sleep Monitor (AC)"
+description = "Disables monitor auto-off on AC. Set the screensaver instead if you still want a screen-blank."
+category = "power"
+severity = "safe"
+presets = []
+ps_apply = "powercfg /change monitor-timeout-ac 0"
+ps_revert = "powercfg /change monitor-timeout-ac 15"

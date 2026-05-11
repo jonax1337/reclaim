@@ -1,0 +1,34 @@
+[
+  { "id": "Mozilla.Firefox", "name": "Firefox", "category": "Browsers", "description": "Open-source web browser by Mozilla.", "homepage": "https://www.mozilla.org/firefox" },
+  { "id": "Google.Chrome", "name": "Google Chrome", "category": "Browsers", "description": "Google's web browser.", "homepage": "https://www.google.com/chrome" },
+  { "id": "Brave.Brave", "name": "Brave", "category": "Browsers", "description": "Privacy-focused Chromium browser.", "homepage": "https://brave.com" },
+  { "id": "Microsoft.VisualStudioCode", "name": "Visual Studio Code", "category": "Development", "description": "Microsoft's source-code editor.", "homepage": "https://code.visualstudio.com" },
+  { "id": "Git.Git", "name": "Git", "category": "Development", "description": "Distributed version control.", "homepage": "https://git-scm.com" },
+  { "id": "GitHub.cli", "name": "GitHub CLI", "category": "Development", "description": "GitHub on the command line.", "homepage": "https://cli.github.com" },
+  { "id": "Docker.DockerDesktop", "name": "Docker Desktop", "category": "Development", "description": "Container platform.", "homepage": "https://www.docker.com" },
+  { "id": "OpenJS.NodeJS.LTS", "name": "Node.js (LTS)", "category": "Development", "description": "JavaScript runtime.", "homepage": "https://nodejs.org" },
+  { "id": "Python.Python.3.12", "name": "Python 3.12", "category": "Development", "description": "Python interpreter.", "homepage": "https://python.org" },
+  { "id": "Rustlang.Rustup", "name": "Rustup", "category": "Development", "description": "Rust toolchain installer.", "homepage": "https://rustup.rs" },
+  { "id": "Microsoft.PowerShell", "name": "PowerShell 7", "category": "Development", "description": "Cross-platform PowerShell.", "homepage": "https://github.com/PowerShell/PowerShell" },
+  { "id": "Microsoft.WindowsTerminal", "name": "Windows Terminal", "category": "Development", "description": "Modern terminal app.", "homepage": "https://github.com/microsoft/terminal" },
+
+  { "id": "7zip.7zip", "name": "7-Zip", "category": "Utilities", "description": "Open-source file archiver.", "homepage": "https://www.7-zip.org" },
+  { "id": "VideoLAN.VLC", "name": "VLC media player", "category": "Media", "description": "Plays everything.", "homepage": "https://www.videolan.org" },
+  { "id": "OBSProject.OBSStudio", "name": "OBS Studio", "category": "Media", "description": "Streaming and recording.", "homepage": "https://obsproject.com" },
+  { "id": "Spotify.Spotify", "name": "Spotify", "category": "Media", "description": "Music streaming.", "homepage": "https://spotify.com" },
+  { "id": "GIMP.GIMP", "name": "GIMP", "category": "Media", "description": "Open-source image editor.", "homepage": "https://gimp.org" },
+
+  { "id": "Discord.Discord", "name": "Discord", "category": "Communication", "description": "Voice and text chat.", "homepage": "https://discord.com" },
+  { "id": "SlackTechnologies.Slack", "name": "Slack", "category": "Communication", "description": "Team communication.", "homepage": "https://slack.com" },
+  { "id": "Telegram.TelegramDesktop", "name": "Telegram", "category": "Communication", "description": "Messaging app.", "homepage": "https://telegram.org" },
+  { "id": "Zoom.Zoom", "name": "Zoom", "category": "Communication", "description": "Video conferencing.", "homepage": "https://zoom.us" },
+
+  { "id": "Notion.Notion", "name": "Notion", "category": "Productivity", "description": "Notes, docs, wikis.", "homepage": "https://notion.so" },
+  { "id": "Obsidian.Obsidian", "name": "Obsidian", "category": "Productivity", "description": "Markdown knowledge base.", "homepage": "https://obsidian.md" },
+
+  { "id": "Valve.Steam", "name": "Steam", "category": "Gaming", "description": "Steam game launcher.", "homepage": "https://store.steampowered.com" },
+  { "id": "EpicGames.EpicGamesLauncher", "name": "Epic Games", "category": "Gaming", "description": "Epic store launcher.", "homepage": "https://www.epicgames.com" },
+
+  { "id": "Bitwarden.Bitwarden", "name": "Bitwarden", "category": "Security", "description": "Open-source password manager.", "homepage": "https://bitwarden.com" },
+  { "id": "Malwarebytes.Malwarebytes", "name": "Malwarebytes", "category": "Security", "description": "Anti-malware scanner.", "homepage": "https://malwarebytes.com" }
+]

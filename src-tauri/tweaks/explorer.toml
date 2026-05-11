@@ -1,0 +1,93 @@
+# Explorer / Shell tweaks.
+
+[[tweak]]
+id = "explorer.show-file-extensions"
+name = "Show File Extensions"
+description = "Always show file extensions in Explorer."
+category = "explorer"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
+name = "HideFileExt"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "explorer.show-hidden-files"
+name = "Show Hidden Files"
+description = "Show hidden files and folders in Explorer."
+category = "explorer"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
+name = "Hidden"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "explorer.classic-context-menu"
+name = "Restore Classic Right-Click Menu"
+description = "Replaces the Windows 11 compact context menu with the classic Windows 10 menu. Restarts Explorer."
+category = "explorer"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+ps_apply = """
+New-Item -Path 'HKCU:\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32' -Force -Value '' | Out-Null
+Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+"""
+ps_revert = """
+Remove-Item -Path 'HKCU:\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}' -Recurse -Force -ErrorAction SilentlyContinue
+Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+"""
+
+[[tweak]]
+id = "explorer.taskbar-left"
+name = "Align Taskbar to Left"
+description = "Moves the taskbar icons (and Start) to the left, like Windows 10."
+category = "explorer"
+severity = "safe"
+presets = ["recommended"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
+name = "TaskbarAl"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "explorer.disable-bing-search"
+name = "Disable Bing in Start Menu"
+description = "Stops Bing web results from appearing in Start Menu search."
+category = "search"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Policies\\Microsoft\\Windows\\Explorer"
+name = "DisableSearchBoxSuggestions"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\Search"
+name = "BingSearchEnabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "explorer.disable-search-web"
+name = "Disable Web Search Connector"
+description = "Disables the connected Search experience that queries Bing."
+category = "search"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search"
+name = "ConnectedSearchUseWeb"
+kind = "dword"
+value = 0

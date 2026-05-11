@@ -1,0 +1,244 @@
+# Group Policy tweaks — things normally only reachable via gpedit.msc on Pro/Enterprise.
+# All are HKLM\Software\Policies entries which the policy engine respects on every SKU.
+
+[[tweak]]
+id = "gpo.disable-lockscreen-spotlight"
+name = "Disable Lock Screen Spotlight Ads"
+description = "Stops Microsoft from rotating ads/suggestions on the lock screen."
+category = "group-policy"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent"
+name = "DisableWindowsSpotlightFeatures"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent"
+name = "DisableThirdPartySuggestions"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "gpo.disable-cloud-content"
+name = "Disable Cloud Content / Consumer Features"
+description = "Disables the 'Consumer Experiences' service that auto-installs sponsored apps."
+category = "group-policy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent"
+name = "DisableConsumerAccountStateContent"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent"
+name = "DisableSoftLanding"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent"
+name = "DisableWindowsConsumerFeatures"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "gpo.disable-startmenu-suggestions"
+name = "Disable Suggestions in Start Menu"
+description = "Hides 'Suggested' / promoted entries from the Start menu."
+category = "group-policy"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-338388Enabled"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SystemPaneSuggestionsEnabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "gpo.disable-onedrive"
+name = "Disable OneDrive Setup"
+description = "Stops OneDrive from auto-launching at first sign-in via group policy."
+category = "group-policy"
+severity = "caution"
+presets = ["aggressive"]
+warning = "Don't enable if you use OneDrive."
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\OneDrive"
+name = "DisableFileSyncNGSC"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "gpo.disable-edge-start-pin"
+name = "Disable Edge Pin to Taskbar"
+description = "Stops Edge from re-pinning itself to the taskbar after updates."
+category = "group-policy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\EdgeUpdate"
+name = "DoNotUpdateToEdgeWithChromium"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "EdgeShortcutOnDesktopForcedEnabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "gpo.disable-windows-tips"
+name = "Disable Windows Tips"
+description = "Disables the rotating tips/suggestions Microsoft pushes through notifications."
+category = "group-policy"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent"
+name = "DisableSoftLanding"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "gpo.disable-storage-sense"
+name = "Disable Storage Sense"
+description = "Stops automatic disk cleanup that can delete files in your Downloads folder."
+category = "group-policy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\StorageSense"
+name = "AllowStorageSenseGlobal"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "gpo.disable-app-suggestions-settings"
+name = "Disable App Suggestions in Settings"
+description = "Hides 'Suggested ways to use Windows' on the Settings home page."
+category = "group-policy"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-338393Enabled"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-353694Enabled"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"
+name = "SubscribedContent-353696Enabled"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "gpo.disable-advertising-id-policy"
+name = "Lock: Advertising ID Off (Policy)"
+description = "Forces the advertising ID off via policy — survives Windows resetting the user-level toggle."
+category = "group-policy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\AdvertisingInfo"
+name = "DisabledByGroupPolicy"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "gpo.disable-edge-sync"
+name = "Disable Edge Sync"
+description = "Prevents Edge from syncing favourites / history with the cloud."
+category = "group-policy"
+severity = "safe"
+presets = ["aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Edge"
+name = "SyncDisabled"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "gpo.disable-personalized-experiences"
+name = "Disable Personalized Lock Screen Experiences"
+description = "Stops Windows from analysing your usage to personalise the lock screen."
+category = "group-policy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent"
+name = "DisableTailoredExperiencesWithDiagnosticData"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "gpo.disable-feature-experiments"
+name = "Disable Feature Experimentation"
+description = "Tells Windows not to enrol your machine in feature A/B tests (CFR)."
+category = "group-policy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+min_build = 19041
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\PolicyManager\\current\\device\\System"
+name = "AllowExperimentation"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "gpo.disable-recall-policy"
+name = "Lock: Recall Off (Policy)"
+description = "Disables Windows Recall via policy. Belt-and-braces with the optional-feature switch."
+category = "group-policy"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+min_build = 26100
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI"
+name = "DisableAIDataAnalysis"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "gpo.disable-click-to-do"
+name = "Disable Click to Do"
+description = "Disables the 24H2+ 'Click to Do' AI helper that screenshots the active window."
+category = "group-policy"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+min_build = 26100
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI"
+name = "DisableClickToDo"
+kind = "dword"
+value = 1

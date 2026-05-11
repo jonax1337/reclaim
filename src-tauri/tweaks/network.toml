@@ -1,0 +1,129 @@
+# Network privacy + performance tweaks.
+
+[[tweak]]
+id = "net.disable-ipv6"
+name = "Disable IPv6 Globally"
+description = "Sets DisabledComponents = 0xFF — disables every IPv6 interface and Teredo."
+category = "network"
+severity = "caution"
+presets = ["aggressive"]
+warning = "Some software (recent .NET, modern VPNs) expects IPv6 to exist. Test before keeping."
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Services\\TCPIP6\\Parameters"
+name = "DisabledComponents"
+kind = "dword"
+value = 255
+
+[[tweak]]
+id = "net.disable-llmnr"
+name = "Disable LLMNR"
+description = "Stops Link-Local Multicast Name Resolution — a name-resolution sidechannel used in lateral-movement attacks."
+category = "network"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient"
+name = "EnableMulticast"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "net.disable-netbios"
+name = "Disable NetBIOS over TCP/IP"
+description = "Disables NBT on every interface — also closes a common SMB enumeration vector."
+category = "network"
+severity = "caution"
+presets = ["aggressive"]
+warning = "Breaks legacy Windows file sharing without DNS."
+ps_apply = "Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NetBT\\Parameters\\Interfaces' | ForEach-Object { Set-ItemProperty -Path $_.PSPath -Name NetbiosOptions -Value 2 -Type DWord -Force }"
+ps_revert = "Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NetBT\\Parameters\\Interfaces' | ForEach-Object { Set-ItemProperty -Path $_.PSPath -Name NetbiosOptions -Value 0 -Type DWord -Force }"
+
+[[tweak]]
+id = "net.enable-doh"
+name = "Enable DoH Auto-Upgrade"
+description = "Tells the resolver to auto-promote DNS to DNS-over-HTTPS for resolvers that support it (Cloudflare, Google, Quad9, etc.)."
+category = "network"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+min_build = 22000
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Services\\Dnscache\\Parameters"
+name = "EnableAutoDoh"
+kind = "dword"
+value = 2
+
+[[tweak]]
+id = "net.disable-teredo"
+name = "Disable Teredo Tunneling"
+description = "Disables Teredo — an IPv6-over-IPv4 NAT-traversal service that's been used as an exfil channel."
+category = "network"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+ps_apply = "netsh interface teredo set state disabled | Out-Null"
+ps_revert = "netsh interface teredo set state default | Out-Null"
+
+[[tweak]]
+id = "net.delivery-opt-lan-only"
+name = "Delivery Optimization: LAN Only"
+description = "Restricts P2P Windows Update sharing to your local network — no random upload over your WAN."
+category = "network"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization"
+name = "DODownloadMode"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "net.delivery-opt-off"
+name = "Delivery Optimization: Off"
+description = "Disables peer-to-peer Windows Update sharing entirely — all downloads come from Microsoft."
+category = "network"
+severity = "safe"
+presets = ["aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization"
+name = "DODownloadMode"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "net.disable-wifi-sense"
+name = "Disable WiFi Sense"
+description = "Stops Windows from sharing your WiFi credentials with contacts."
+category = "network"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\PolicyManager\\default\\WiFi\\AllowWiFiHotSpotReporting"
+name = "Value"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\PolicyManager\\default\\WiFi\\AllowAutoConnectToWiFiSenseHotspots"
+name = "Value"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "net.disable-ncsi-probe"
+name = "Disable NCSI Active Probe"
+description = "Stops Windows from probing http://www.msftconnecttest.com to check if you're online."
+category = "network"
+severity = "safe"
+presets = ["aggressive"]
+warning = "Internet/Connected/Limited indicator on the tray icon stops working."
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Services\\NlaSvc\\Parameters\\Internet"
+name = "EnableActiveProbing"
+kind = "dword"
+value = 0

@@ -1,0 +1,113 @@
+# Bloatware (UWP / AppX) removals. Provisioned package is also removed so new
+# user profiles don't get them back.
+
+[[tweak]]
+id = "bloat.bing-news"
+name = "Remove Bing News"
+description = "Uninstalls Microsoft Bing News from this device."
+category = "bloatware"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.appx]]
+package = "Microsoft.BingNews"
+
+[[tweak]]
+id = "bloat.bing-weather"
+name = "Remove Bing Weather"
+description = "Uninstalls the Bing Weather app."
+category = "bloatware"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.appx]]
+package = "Microsoft.BingWeather"
+
+[[tweak]]
+id = "bloat.solitaire"
+name = "Remove Microsoft Solitaire Collection"
+description = "Uninstalls the bundled Solitaire collection (it contains ads)."
+category = "bloatware"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.appx]]
+package = "Microsoft.MicrosoftSolitaireCollection"
+
+[[tweak]]
+id = "bloat.officehub"
+name = "Remove Get Office (Office Hub)"
+description = "Uninstalls the 'Get Office' shortcut UWP app."
+category = "bloatware"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.appx]]
+package = "Microsoft.MicrosoftOfficeHub"
+
+[[tweak]]
+id = "bloat.gethelp"
+name = "Remove Get Help"
+description = "Uninstalls the 'Get Help' UWP app."
+category = "bloatware"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.appx]]
+package = "Microsoft.GetHelp"
+
+[[tweak]]
+id = "bloat.feedback-hub"
+name = "Remove Feedback Hub"
+description = "Uninstalls the Windows Feedback Hub app."
+category = "bloatware"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.appx]]
+package = "Microsoft.WindowsFeedbackHub"
+
+[[tweak]]
+id = "bloat.zune-music"
+name = "Remove Groove Music"
+description = "Uninstalls the legacy Zune/Groove Music app."
+category = "bloatware"
+severity = "safe"
+presets = ["aggressive"]
+[[tweak.appx]]
+package = "Microsoft.ZuneMusic"
+
+[[tweak]]
+id = "bloat.zune-video"
+name = "Remove Movies & TV"
+description = "Uninstalls the Zune Video / Movies & TV app."
+category = "bloatware"
+severity = "safe"
+presets = ["aggressive"]
+[[tweak.appx]]
+package = "Microsoft.ZuneVideo"
+
+[[tweak]]
+id = "bloat.xbox"
+name = "Remove Xbox Apps"
+description = "Removes Xbox Game Bar, Xbox Identity Provider, and related UWP apps. Game Pass / Xbox Cloud will not work without these."
+category = "bloatware"
+severity = "caution"
+presets = ["aggressive"]
+warning = "Removes Xbox Game Bar; gamers should keep this enabled."
+[[tweak.appx]]
+package = "Microsoft.XboxGameOverlay"
+[[tweak.appx]]
+package = "Microsoft.XboxIdentityProvider"
+[[tweak.appx]]
+package = "Microsoft.XboxSpeechToTextOverlay"
+[[tweak.appx]]
+package = "Microsoft.Xbox.TCUI"
+[[tweak.appx]]
+package = "Microsoft.GamingApp"
+
+[[tweak]]
+id = "bloat.widgets"
+name = "Remove Widgets / Web Experience"
+description = "Uninstalls the Web Experience pack and Widgets platform runtime."
+category = "bloatware"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.appx]]
+package = "MicrosoftWindows.Client.WebExperience"
+[[tweak.appx]]
+package = "Microsoft.WidgetsPlatformRuntime"

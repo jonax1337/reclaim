@@ -1,0 +1,133 @@
+# Deeper telemetry — frameworks Microsoft can't reach by policy alone.
+
+[[tweak]]
+id = "privacy.disable-ceip"
+name = "Disable Customer Experience Improvement Program"
+description = "Disables Windows CEIP system-wide via SQM policy."
+category = "privacy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Microsoft\\SQMClient\\Windows"
+name = "CEIPEnable"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\SQMClient\\Windows"
+name = "CEIPEnable"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "privacy.dotnet-telemetry-off"
+name = "Disable .NET CLI Telemetry"
+description = "Sets DOTNET_CLI_TELEMETRY_OPTOUT=1 system-wide."
+category = "privacy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
+name = "DOTNET_CLI_TELEMETRY_OPTOUT"
+kind = "string"
+value = "1"
+
+[[tweak]]
+id = "privacy.powershell-telemetry-off"
+name = "Disable PowerShell Telemetry"
+description = "Sets POWERSHELL_TELEMETRY_OPTOUT=1 system-wide."
+category = "privacy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
+name = "POWERSHELL_TELEMETRY_OPTOUT"
+kind = "string"
+value = "1"
+
+[[tweak]]
+id = "privacy.office-telemetry-off"
+name = "Disable Office Telemetry"
+description = "Blocks diagnostic data uploads from Microsoft Office (M365 / 2019+)."
+category = "privacy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Policies\\Microsoft\\Office\\Common\\ClientTelemetry"
+name = "SendTelemetry"
+kind = "dword"
+value = 3
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Policies\\Microsoft\\Office\\Common\\ClientTelemetry"
+name = "DisableTelemetry"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "privacy.disable-inking-personalization"
+name = "Disable Inking & Typing Personalization"
+description = "Stops Windows from harvesting your typing / inking for the 'language model'."
+category = "privacy"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKCU"
+path = "SOFTWARE\\Microsoft\\InputPersonalization"
+name = "RestrictImplicitTextCollection"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKCU"
+path = "SOFTWARE\\Microsoft\\InputPersonalization"
+name = "RestrictImplicitInkCollection"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKCU"
+path = "SOFTWARE\\Microsoft\\InputPersonalization\\TrainedDataStore"
+name = "HarvestContacts"
+kind = "dword"
+value = 0
+[[tweak.registry]]
+hive = "HKCU"
+path = "SOFTWARE\\Microsoft\\Personalization\\Settings"
+name = "AcceptedPrivacyPolicy"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "privacy.disable-handwriting-error-reports"
+name = "Disable Handwriting Error Reports"
+description = "Stops handwriting recognition data being sent to Microsoft for analysis."
+category = "privacy"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\TabletPC"
+name = "PreventHandwritingErrorReports"
+kind = "dword"
+value = 1
+
+[[tweak]]
+id = "privacy.disable-error-reporting"
+name = "Disable Windows Error Reporting"
+description = "Stops crash dumps from being shipped to Microsoft."
+category = "privacy"
+severity = "safe"
+presets = ["aggressive"]
+warning = "If you need to debug your own crashes, leave this on."
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Error Reporting"
+name = "Disabled"
+kind = "dword"
+value = 1
+[[tweak.services]]
+name = "WerSvc"
+startup = "disabled"

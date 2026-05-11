@@ -1,0 +1,50 @@
+# Windows 11 AI features (Copilot, Recall).
+
+[[tweak]]
+id = "ai.disable-copilot"
+name = "Disable Windows Copilot"
+description = "Turns off the Windows Copilot side panel and Taskbar button."
+category = "ai"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+min_build = 22621
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Policies\\Microsoft\\Windows\\WindowsCopilot"
+name = "TurnOffWindowsCopilot"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKLM"
+path = "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsCopilot"
+name = "TurnOffWindowsCopilot"
+kind = "dword"
+value = 1
+[[tweak.registry]]
+hive = "HKCU"
+path = "Software\\Microsoft\\Windows\\Shell\\Copilot"
+name = "IsCopilotAvailable"
+kind = "dword"
+value = 0
+
+[[tweak]]
+id = "ai.remove-copilot-app"
+name = "Uninstall Copilot App"
+description = "Uninstalls the Copilot UWP package."
+category = "ai"
+severity = "safe"
+presets = ["recommended", "aggressive"]
+min_build = 22621
+[[tweak.appx]]
+package = "Microsoft.Copilot"
+
+[[tweak]]
+id = "ai.disable-recall"
+name = "Disable Windows Recall"
+description = "Disables the Recall feature (24H2+) via the optional feature switch."
+category = "ai"
+severity = "safe"
+presets = ["minimal", "recommended", "aggressive"]
+min_build = 26100
+ps_apply = "Disable-WindowsOptionalFeature -Online -FeatureName Recall -NoRestart -ErrorAction SilentlyContinue"
+ps_revert = "Enable-WindowsOptionalFeature -Online -FeatureName Recall -NoRestart -ErrorAction SilentlyContinue"
