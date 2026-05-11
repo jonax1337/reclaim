@@ -22,9 +22,9 @@
     const next = new Set(installing); next.add(id); installing = next;
     try {
       await invoke('install_winget_app', { id });
-      store.toast('ok', `Installed ${id}`);
+      store.toast({ kind: 'ok', msg: `Installed ${id}` });
     } catch (e) {
-      store.toast('err', `${id}: ${e}`);
+      store.toast({ kind: 'err', msg: `${id}: ${e}` });
     } finally {
       const n = new Set(installing); n.delete(id); installing = n;
     }
