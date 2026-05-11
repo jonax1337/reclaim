@@ -1,8 +1,6 @@
 <div align="center">
 
-# Reclaim
-
-**Reclaim your Windows.**
+<img src=".github/assets/banner.svg" alt="Reclaim — Reclaim your Windows" width="100%" />
 
 A modern, safe Windows 11 tweaker built with **Tauri 2 + Svelte 5** and a **Fluent / Mica** UI.
 
