@@ -39,5 +39,16 @@ jobs:
       - name: Type-check frontend
         run: npm run check
 
+      - name: Detect prerelease version
+        id: ver
+        shell: bash
+        run: |
+          v=$(node -p "require('./package.json').version")
+          if [[ "$v" == *-* ]]; then
+            echo "args=--bundles nsis" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build (Tauri)
-        run: npm run tauri build
+        run: npm run tauri build -- ${{ steps.ver.outputs.args }}
