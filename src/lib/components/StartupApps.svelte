@@ -1,7 +1,7 @@
 <script lang="ts">
+  import Icon from './Icon.svelte';
   import { onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import { RefreshCw, Search } from 'lucide-svelte';
   import { store } from '../stores/tweaks.svelte';
   import Toggle from './Toggle.svelte';
 
@@ -62,11 +62,11 @@
 
 <div class="toolbar">
   <div class="search">
-    <Search size={14} />
+    <Icon name="Search" size={14} />
     <input type="search" bind:value={query} placeholder="Filter startup items…" />
   </div>
   <button class="iconbtn" onclick={load} title="Reload">
-    <RefreshCw size={14} class={loading ? 'spin' : ''} />
+    <Icon name="RefreshCw" size={14} class={loading ? 'spin' : ''} />
   </button>
 </div>
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Play, ShieldCheck } from 'lucide-svelte';
+  import Icon from './Icon.svelte';
   import { store } from '../stores/tweaks.svelte';
   import { settings } from '../stores/settings.svelte';
 
@@ -21,12 +21,12 @@
 
     <label class="rp">
       <input type="checkbox" bind:checked={restorePoint} />
-      <ShieldCheck size={13} strokeWidth={1.75} />
+      <Icon name="ShieldCheck" size={13} strokeWidth={1.75} />
       <span>Restore point first</span>
     </label>
 
     <button class="primary" onclick={() => store.applySelection(restorePoint)}>
-      <Play size={13} strokeWidth={2.25} />
+      <Icon name="Play" size={13} strokeWidth={2.25} />
       Apply selected
     </button>
   </div>

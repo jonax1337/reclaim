@@ -1,7 +1,7 @@
 <script lang="ts">
+  import Icon from './Icon.svelte';
   import { onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import { Search, Play, Square, RefreshCw } from 'lucide-svelte';
   import { store } from '../stores/tweaks.svelte';
 
   interface ServiceInfo {
@@ -94,7 +94,7 @@
 
 <div class="toolbar">
   <div class="search">
-    <Search size={14} />
+    <Icon name="Search" size={14} />
     <input type="search" bind:value={query} placeholder="Filter by name or display name…" />
   </div>
   <div class="seg" role="tablist">
@@ -108,7 +108,7 @@
     {/each}
   </div>
   <button class="refresh" onclick={load} title="Reload">
-    <RefreshCw size={14} class={loading ? 'spin' : ''} />
+    <Icon name="RefreshCw" size={14} class={loading ? 'spin' : ''} />
   </button>
 </div>
 
@@ -156,11 +156,11 @@
         <div class="cell ta-r actions">
           {#if isRunning}
             <button class="icon-btn" disabled={isBusy} title="Stop" onclick={() => stopSvc(svc)}>
-              <Square size={12} />
+              <Icon name="Square" size={12} />
             </button>
           {:else}
             <button class="icon-btn" disabled={isBusy} title="Start" onclick={() => startSvc(svc)}>
-              <Play size={12} />
+              <Icon name="Play" size={12} />
             </button>
           {/if}
         </div>

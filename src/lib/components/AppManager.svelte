@@ -1,7 +1,7 @@
 <script lang="ts">
+  import Icon from './Icon.svelte';
   import { onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import { Search, Trash2, Download, RefreshCw, Filter, CheckSquare } from 'lucide-svelte';
   import { store } from '../stores/tweaks.svelte';
 
   interface AppEntry {
@@ -119,7 +119,7 @@
 
 <div class="toolbar">
   <div class="search">
-    <Search size={14} />
+    <Icon name="Search" size={14} />
     <input type="search" bind:value={query} placeholder="Search apps or package id…" />
   </div>
   <div class="seg" role="tablist">
@@ -133,7 +133,7 @@
     {/each}
   </div>
   <button class="iconbtn" onclick={load} title="Reload">
-    <RefreshCw size={14} class={loading ? 'spin' : ''} />
+    <Icon name="RefreshCw" size={14} class={loading ? 'spin' : ''} />
   </button>
 </div>
 
@@ -141,10 +141,10 @@
   <span>{filtered.length} of {apps.length} apps</span>
   {#if selected.size > 0}
     <span class="sel">
-      <CheckSquare size={12} /> {selected.size} selected
+      <Icon name="CheckSquare" size={12} /> {selected.size} selected
       <button class="link" onclick={() => (selected = new Set())}>Clear</button>
       <button class="danger-btn" onclick={batchRemove}>
-        <Trash2 size={12} /> Remove selected
+        <Icon name="Trash2" size={12} /> Remove selected
       </button>
     </span>
   {:else}
@@ -186,7 +186,7 @@
           <div class="actions">
             {#if app.installed}
               <button class="ibtn danger" disabled={isBusy} onclick={() => toggleApp(app)}>
-                <Trash2 size={12} /> Remove
+                <Icon name="Trash2" size={12} /> Remove
               </button>
             {:else}
               <button
@@ -195,7 +195,7 @@
                 title={app.winget_id ? `winget: ${app.winget_id}` : 'Tries Add-AppxPackage; falls back to MS Store'}
                 onclick={() => toggleApp(app)}
               >
-                <Download size={12} /> Install
+                <Icon name="Download" size={12} /> Install
               </button>
             {/if}
           </div>
@@ -206,7 +206,7 @@
 {/each}
 
 {#if filtered.length === 0 && !loading}
-  <p class="empty"><Filter size={20} /><br/>No apps match this filter.</p>
+  <p class="empty"><Icon name="Filter" size={20} /><br/>No apps match this filter.</p>
 {/if}
 
 <style>

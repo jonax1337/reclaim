@@ -1,7 +1,7 @@
 <script lang="ts">
+  import Icon from './Icon.svelte';
   import { onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import { Cpu, Monitor, MemoryStick, HardDrive, Server, RefreshCw } from 'lucide-svelte';
   import { store } from '../stores/tweaks.svelte';
 
   interface HardwareInfo {
@@ -40,7 +40,7 @@
 <div class="hdr">
   <p class="lede">Live snapshot from WMI / Get-PhysicalDisk. No data leaves your machine.</p>
   <button class="refresh" onclick={load}>
-    <RefreshCw size={13} class={loading ? 'spin' : ''} /> Reload
+    <Icon name="RefreshCw" size={13} class={loading ? 'spin' : ''} /> Reload
   </button>
 </div>
 
@@ -50,7 +50,7 @@
   <div class="grid">
     {#if info.cpu}
       <section class="card cpu">
-        <header><Cpu size={14} /><h3>Processor</h3></header>
+        <header><Icon name="Cpu" size={14} /><h3>Processor</h3></header>
         <strong class="big">{info.cpu.name}</strong>
         <dl>
           <dt>Cores / Threads</dt><dd>{info.cpu.cores} / {info.cpu.threads}</dd>
@@ -62,7 +62,7 @@
 
     {#if info.memory}
       <section class="card">
-        <header><MemoryStick size={14} /><h3>Memory</h3></header>
+        <header><Icon name="MemoryStick" size={14} /><h3>Memory</h3></header>
         <strong class="big">{info.memory.total_gb} GB total</strong>
         {#if info.memory.modules.length > 0}
           <ul class="modlist">
@@ -82,7 +82,7 @@
     {#each info.gpus as gpu (gpu.name)}
       <section class="card">
         <header>
-          <Monitor size={14} />
+          <Icon name="Monitor" size={14} />
           <h3>Graphics</h3>
           <span class="vendor-pill" style="--c: {vendorColor(gpu.vendor)}">{gpu.vendor}</span>
         </header>
@@ -97,7 +97,7 @@
 
     {#if info.motherboard}
       <section class="card">
-        <header><Server size={14} /><h3>Motherboard</h3></header>
+        <header><Icon name="Server" size={14} /><h3>Motherboard</h3></header>
         <strong class="big">{info.motherboard.product}</strong>
         <dl>
           <dt>Manufacturer</dt><dd>{info.motherboard.manufacturer}</dd>
@@ -112,7 +112,7 @@
 
     {#if info.disks.length > 0}
       <section class="card span2">
-        <header><HardDrive size={14} /><h3>Storage</h3></header>
+        <header><Icon name="HardDrive" size={14} /><h3>Storage</h3></header>
         <table>
           <thead>
             <tr><th>Model</th><th>Size</th><th>Type</th><th>Bus</th></tr>

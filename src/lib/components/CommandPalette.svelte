@@ -1,6 +1,6 @@
 <script lang="ts">
+  import Icon from './Icon.svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import { Search, ToggleRight, Package, LayoutDashboard, ArrowRight, CornerDownLeft } from 'lucide-svelte';
   import { store } from '../stores/tweaks.svelte';
   import type { ViewKey } from '../types';
 
@@ -126,7 +126,7 @@
   <div class="scrim" onclick={close} role="presentation"></div>
   <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette">
     <div class="input-row">
-      <Search size={16} />
+      <Icon name="Search" size={16} />
       <input
         bind:this={inputEl}
         bind:value={query}
@@ -152,9 +152,9 @@
             onmouseenter={() => (cursor = i)}
           >
             <span class="icon">
-              {#if item.kind === 'nav'}<LayoutDashboard size={14} />
-              {:else if item.kind === 'tweak'}<ToggleRight size={14} />
-              {:else}<Package size={14} />{/if}
+              {#if item.kind === 'nav'}<Icon name="LayoutDashboard" size={14} />
+              {:else if item.kind === 'tweak'}<Icon name="ToggleRight" size={14} />
+              {:else}<Icon name="Package" size={14} />{/if}
             </span>
             <span class="label">{item.label}</span>
             <span class="hint">{item.hint}</span>
@@ -174,7 +174,7 @@
 
     <footer>
       <span class="ft"><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
-      <span class="ft"><kbd><CornerDownLeft size={10} /></kbd> select</span>
+      <span class="ft"><kbd><Icon name="CornerDownLeft" size={10} /></kbd> select</span>
       <span class="ft right">{results.length} result{results.length === 1 ? '' : 's'}</span>
     </footer>
   </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CheckCircle2, XCircle, Info, X } from 'lucide-svelte';
+  import Icon from './Icon.svelte';
   import { store } from '../stores/tweaks.svelte';
 </script>
 
@@ -7,9 +7,9 @@
   {#each store.toasts as t (t.id)}
     <div class="toast {t.kind}">
       <span class="icon">
-        {#if t.kind === 'ok'}<CheckCircle2 size={16} />
-        {:else if t.kind === 'err'}<XCircle size={16} />
-        {:else}<Info size={16} />{/if}
+        {#if t.kind === 'ok'}<Icon name="CheckCircle2" size={16} />
+        {:else if t.kind === 'err'}<Icon name="XCircle" size={16} />
+        {:else}<Icon name="Info" size={16} />{/if}
       </span>
       <span class="msg">{t.msg}</span>
       {#if t.action}
@@ -24,7 +24,7 @@
         </button>
       {/if}
       <button class="dismiss" aria-label="Dismiss" onclick={() => store.dismissToast(t.id)}>
-        <X size={12} />
+        <Icon name="X" size={12} />
       </button>
     </div>
   {/each}

@@ -1,15 +1,16 @@
 <script lang="ts">
-  import { Sun, Moon, Monitor, ShieldCheck, Zap, FolderOpen } from 'lucide-svelte';
+  import Icon from './Icon.svelte';
+  import type { FluentIconName } from '../icons';
   import { invoke } from '@tauri-apps/api/core';
   import { settings } from '../stores/settings.svelte';
   import { store } from '../stores/tweaks.svelte';
   import Toggle from './Toggle.svelte';
 
-  const themes = [
-    { id: 'dark',   label: 'Dark',   icon: Moon },
-    { id: 'light',  label: 'Light',  icon: Sun },
-    { id: 'system', label: 'System', icon: Monitor }
-  ] as const;
+  const themes: { id: 'dark' | 'light' | 'system'; label: string; icon: FluentIconName }[] = [
+    { id: 'dark',   label: 'Dark',   icon: 'Moon' },
+    { id: 'light',  label: 'Light',  icon: 'Sun' },
+    { id: 'system', label: 'System', icon: 'Monitor' }
+  ];
 
   async function openAppData() {
     try {
@@ -33,7 +34,7 @@
             class:active={settings.theme === t.id}
             onclick={() => (settings.theme = t.id)}
           >
-            <t.icon size={13} />
+            <Icon name={t.icon} size={13} bold={settings.theme === t.id} />
             {t.label}
           </button>
         {/each}
@@ -56,7 +57,7 @@
     <header><h2>Safety</h2></header>
     <div class="row">
       <div class="label">
-        <strong><ShieldCheck size={13} /> Create restore point on batch apply</strong>
+        <strong><Icon name="ShieldCheck" size={13} /> Create restore point on batch apply</strong>
         <span>Default for the checkbox in the Apply bar. Single-tweak toggles are not affected.</span>
       </div>
       <Toggle

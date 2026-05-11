@@ -1,6 +1,6 @@
 <script lang="ts">
+  import Icon from '$lib/components/Icon.svelte';
   import { onMount } from 'svelte';
-  import { Search } from 'lucide-svelte';
   import { getCurrentWindow } from '@tauri-apps/api/window';
 
   import TitleBar from '$lib/components/TitleBar.svelte';
@@ -151,7 +151,7 @@
       </div>
       {#if categoryFor[view] || view === 'services'}
         <div class="search">
-          <Search size={14} />
+          <Icon name="Search" size={14} />
           <input type="search" placeholder="Filter tweaks…" bind:value={store.search} />
         </div>
       {/if}

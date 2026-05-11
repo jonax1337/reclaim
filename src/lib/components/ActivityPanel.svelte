@@ -1,7 +1,7 @@
 <script lang="ts">
+  import Icon from './Icon.svelte';
   import { onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import { Undo2, RefreshCw, Inbox } from 'lucide-svelte';
   import { store } from '../stores/tweaks.svelte';
   import SeverityBadge from './SeverityBadge.svelte';
   import type { Severity } from '../types';
@@ -67,14 +67,14 @@
     Reverting restores the original registry values, service start types, and re-registers AppX packages.
   </p>
   <button class="refresh" onclick={load}>
-    <RefreshCw size={13} class={loading ? 'spin' : ''} />
+    <Icon name="RefreshCw" size={13} class={loading ? 'spin' : ''} />
     Reload
   </button>
 </div>
 
 {#if entries.length === 0 && !loading}
   <div class="empty">
-    <Inbox size={28} />
+    <Icon name="Inbox" size={28} />
     <p>No tweaks applied yet.</p>
     <span>Apply something — it will show up here so you can roll it back later.</span>
   </div>
@@ -98,7 +98,7 @@
           disabled={busy.has(e.id)}
           onclick={() => revert(e)}
         >
-          <Undo2 size={13} />
+          <Icon name="Undo2" size={13} />
           Revert
         </button>
       </div>

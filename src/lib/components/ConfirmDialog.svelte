@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { AlertTriangle, X } from 'lucide-svelte';
-
+  import Icon from './Icon.svelte';
   let {
     open = $bindable<boolean>(false),
     title = 'Are you sure?',
@@ -41,9 +40,9 @@
   <div class="scrim" onclick={close} role="presentation"></div>
   <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="cd-title">
     <header>
-      {#if danger}<AlertTriangle size={18} class="warn-icon" />{/if}
+      {#if danger}<Icon name="AlertTriangle" size={18} class="warn-icon" />{/if}
       <h2 id="cd-title">{title}</h2>
-      <button class="close" aria-label="Close" onclick={close}><X size={14} /></button>
+      <button class="close" aria-label="Close" onclick={close}><Icon name="X" size={14} /></button>
     </header>
     {#if body}<p>{body}</p>{/if}
     <footer>

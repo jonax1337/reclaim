@@ -1,40 +1,36 @@
 <script lang="ts">
-  import {
-    LayoutDashboard, ShieldOff, Trash2, Sparkles, FolderOpen,
-    Search, Gauge, Gamepad2, Settings2, Package, History, Settings,
-    AppWindow, Power, Cpu, RefreshCcw, Lock, Monitor,
-    Wifi, Zap, Globe, Bell, Code2, Volume2, ShieldCheck
-  } from 'lucide-svelte';
+  import Icon from './Icon.svelte';
+  import type { FluentIconName } from '../icons';
   import type { ViewKey } from '../types';
 
   let { current = $bindable<ViewKey>('dashboard') }: { current: ViewKey } = $props();
 
-  const items: { key: ViewKey; label: string; icon: any; group?: string }[] = [
-    { key: 'dashboard',   label: 'Dashboard',  icon: LayoutDashboard, group: 'Overview' },
-    { key: 'privacy',     label: 'Privacy',    icon: ShieldOff,  group: 'Tweaks' },
-    { key: 'bloatware',   label: 'Bloatware',  icon: Trash2 },
-    { key: 'ai',          label: 'AI Features',icon: Sparkles },
-    { key: 'explorer',    label: 'Explorer',   icon: FolderOpen },
-    { key: 'search',      label: 'Search',     icon: Search },
-    { key: 'performance', label: 'Performance',icon: Gauge },
-    { key: 'gaming',      label: 'Gaming',     icon: Gamepad2 },
-    { key: 'services',    label: 'Services',   icon: Settings2 },
-    { key: 'updates',     label: 'Windows Update', icon: RefreshCcw },
-    { key: 'group-policy',label: 'Group Policy',   icon: Lock },
-    { key: 'network',     label: 'Network',    icon: Wifi, group: 'More Tweaks' },
-    { key: 'power',       label: 'Power',      icon: Zap },
-    { key: 'edge',        label: 'Edge',       icon: Globe },
-    { key: 'annoyances',  label: 'Annoyances', icon: Bell },
-    { key: 'developer',   label: 'Developer',  icon: Code2 },
-    { key: 'audio',       label: 'Audio',      icon: Volume2 },
-    { key: 'security',    label: 'Hardening',  icon: ShieldCheck },
-    { key: 'app-manager', label: 'App Manager',  icon: AppWindow, group: 'System' },
-    { key: 'startup',     label: 'Startup Apps', icon: Power },
-    { key: 'hardware',    label: 'Hardware',     icon: Cpu },
-    { key: 'drivers',     label: 'GPU Drivers',  icon: Monitor },
-    { key: 'apps',        label: 'Install Apps', icon: Package, group: 'Tools' },
-    { key: 'activity',    label: 'Activity',     icon: History },
-    { key: 'settings',    label: 'Settings',     icon: Settings }
+  const items: { key: ViewKey; label: string; icon: FluentIconName; group?: string }[] = [
+    { key: 'dashboard',   label: 'Dashboard',  icon: 'LayoutDashboard', group: 'Overview' },
+    { key: 'privacy',     label: 'Privacy',    icon: 'ShieldOff',  group: 'Tweaks' },
+    { key: 'bloatware',   label: 'Bloatware',  icon: 'Trash2' },
+    { key: 'ai',          label: 'AI Features',icon: 'Sparkles' },
+    { key: 'explorer',    label: 'Explorer',   icon: 'FolderOpen' },
+    { key: 'search',      label: 'Search',     icon: 'Search' },
+    { key: 'performance', label: 'Performance',icon: 'Gauge' },
+    { key: 'gaming',      label: 'Gaming',     icon: 'Gamepad2' },
+    { key: 'services',    label: 'Services',   icon: 'Settings2' },
+    { key: 'updates',     label: 'Windows Update', icon: 'RefreshCcw' },
+    { key: 'group-policy',label: 'Group Policy',   icon: 'Lock' },
+    { key: 'network',     label: 'Network',    icon: 'Wifi', group: 'More Tweaks' },
+    { key: 'power',       label: 'Power',      icon: 'Zap' },
+    { key: 'edge',        label: 'Edge',       icon: 'Globe' },
+    { key: 'annoyances',  label: 'Annoyances', icon: 'Bell' },
+    { key: 'developer',   label: 'Developer',  icon: 'Code2' },
+    { key: 'audio',       label: 'Audio',      icon: 'Volume2' },
+    { key: 'security',    label: 'Hardening',  icon: 'ShieldCheck' },
+    { key: 'app-manager', label: 'App Manager',  icon: 'AppWindow', group: 'System' },
+    { key: 'startup',     label: 'Startup Apps', icon: 'Power' },
+    { key: 'hardware',    label: 'Hardware',     icon: 'Cpu' },
+    { key: 'drivers',     label: 'GPU Drivers',  icon: 'Monitor' },
+    { key: 'apps',        label: 'Install Apps', icon: 'Package', group: 'Tools' },
+    { key: 'activity',    label: 'Activity',     icon: 'History' },
+    { key: 'settings',    label: 'Settings',     icon: 'Settings' }
   ];
 </script>
 
@@ -49,7 +45,7 @@
       onclick={() => (current = item.key)}
     >
       <span class="indicator" aria-hidden="true"></span>
-      <item.icon size={18} strokeWidth={1.75} />
+      <Icon name={item.icon} size={18} bold={current === item.key} />
       <span class="label">{item.label}</span>
     </button>
   {/each}

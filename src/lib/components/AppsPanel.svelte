@@ -1,6 +1,6 @@
 <script lang="ts">
+  import Icon from './Icon.svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import { Download, ExternalLink, Search } from 'lucide-svelte';
   import { store } from '../stores/tweaks.svelte';
 
   let query = $state('');
@@ -34,7 +34,7 @@
 <header class="hdr">
   <p class="lede">Curated list installed via <code>winget</code>. Silent &amp; unattended.</p>
   <div class="search">
-    <Search size={14} />
+    <Icon name="Search" size={14} />
     <input type="search" bind:value={query} placeholder="Search apps…" />
   </div>
 </header>
@@ -54,7 +54,7 @@
           <div class="actions">
             {#if app.homepage}
               <a class="link" href={app.homepage} target="_blank" rel="noreferrer noopener" title="Homepage">
-                <ExternalLink size={14} />
+                <Icon name="ExternalLink" size={14} />
               </a>
             {/if}
             <button
@@ -62,7 +62,7 @@
               disabled={installing.has(app.id)}
               onclick={() => install(app.id)}
             >
-              <Download size={14} />
+              <Icon name="Download" size={14} />
               {installing.has(app.id) ? 'Installing…' : 'Install'}
             </button>
           </div>

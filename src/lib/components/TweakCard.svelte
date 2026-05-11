@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AlertTriangle, Check } from 'lucide-svelte';
+  import Icon from './Icon.svelte';
   import type { Tweak } from '../types';
   import SeverityBadge from './SeverityBadge.svelte';
   import Toggle from './Toggle.svelte';
@@ -32,7 +32,7 @@
     aria-label={selected ? `Deselect ${tweak.name}` : `Select ${tweak.name}`}
     onclick={(e) => { e.stopPropagation(); onToggleSelected(); }}
   >
-    {#if selected}<Check size={12} strokeWidth={3} />{/if}
+    {#if selected}<Icon name="Check" size={12} strokeWidth={3} />{/if}
   </button>
 
   <div class="body">
@@ -45,7 +45,7 @@
 
     {#if tweak.warning}
       <div class="warn">
-        <AlertTriangle size={13} strokeWidth={2} />
+        <Icon name="AlertTriangle" size={13} strokeWidth={2} />
         <span>{tweak.warning}</span>
       </div>
     {/if}
@@ -62,7 +62,7 @@
       {/if}
       {#if applied}
         <span class="dot-sep">·</span>
-        <span class="applied-tag"><Check size={10} strokeWidth={3} /> Applied</span>
+        <span class="applied-tag"><Icon name="Check" size={10} strokeWidth={3} /> Applied</span>
       {/if}
     </footer>
   </div>

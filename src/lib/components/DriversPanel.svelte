@@ -1,10 +1,7 @@
 <script lang="ts">
+  import Icon from './Icon.svelte';
   import { onMount } from 'svelte';
   import { invoke } from '@tauri-apps/api/core';
-  import {
-    Download, ExternalLink, Monitor, RefreshCw, ShieldAlert,
-    SearchCheck, PackagePlus, Filter, Search
-  } from 'lucide-svelte';
   import { store } from '../stores/tweaks.svelte';
 
   interface Gpu {
@@ -168,9 +165,9 @@
 </script>
 
 <div class="tabs" role="tablist">
-  <button role="tab" aria-selected={tab === 'gpu'}     class:active={tab === 'gpu'}     onclick={() => (tab = 'gpu')}><Monitor size={13} /> GPUs</button>
-  <button role="tab" aria-selected={tab === 'updates'} class:active={tab === 'updates'} onclick={() => (tab = 'updates')}><PackagePlus size={13} /> Driver Updates {#if updates.length > 0}<span class="badge">{updates.length}</span>{/if}</button>
-  <button role="tab" aria-selected={tab === 'all'}     class:active={tab === 'all'}     onclick={() => (tab = 'all')}><Filter size={13} /> All Drivers</button>
+  <button role="tab" aria-selected={tab === 'gpu'}     class:active={tab === 'gpu'}     onclick={() => (tab = 'gpu')}><Icon name="Monitor" size={13} /> GPUs</button>
+  <button role="tab" aria-selected={tab === 'updates'} class:active={tab === 'updates'} onclick={() => (tab = 'updates')}><Icon name="PackagePlus" size={13} /> Driver Updates {#if updates.length > 0}<span class="badge">{updates.length}</span>{/if}</button>
+  <button role="tab" aria-selected={tab === 'all'}     class:active={tab === 'all'}     onclick={() => (tab = 'all')}><Icon name="Filter" size={13} /> All Drivers</button>
 </div>
 
 {#if tab === 'gpu'}
@@ -179,7 +176,7 @@
       Driver versions detected via WMI. The vendor's own updater is the safest path —
       use the "Driver Updates" tab to pull updates from Windows Update without leaving the app.
     </p>
-    <button class="refresh" onclick={loadGpus}><RefreshCw size={13} class={loadingGpu ? 'spin' : ''} /> Reload</button>
+    <button class="refresh" onclick={loadGpus}><Icon name="RefreshCw" size={13} class={loadingGpu ? 'spin' : ''} /> Reload</button>
   </div>
 
   {#if gpus.length === 0 && !loadingGpu}
@@ -191,7 +188,7 @@
         {@const tool = vendorTools[gpu.vendor]}
         <article class="gpucard" style="--c: {vendorColor(gpu.vendor)}">
           <header>
-            <Monitor size={16} />
+            <Icon name="Monitor" size={16} />
             <h3>{gpu.name}</h3>
             <span class="vendor-pill">{gpu.vendor}</span>
           </header>
@@ -210,10 +207,10 @@
           {#if tool}
             <footer>
               <button class="primary" disabled={installing.has(gpu.vendor)} onclick={() => installVendor(gpu.vendor)}>
-                <Download size={13} /> {installing.has(gpu.vendor) ? 'Installing…' : `Install ${tool.label}`}
+                <Icon name="Download" size={13} /> {installing.has(gpu.vendor) ? 'Installing…' : `Install ${tool.label}`}
               </button>
               <a class="link" href={tool.download} target="_blank" rel="noreferrer noopener">
-                <ExternalLink size={13} /> Manual download
+                <Icon name="ExternalLink" size={13} /> Manual download
               </a>
             </footer>
           {/if}
@@ -231,7 +228,7 @@
     </p>
     <div class="hdr-actions">
       <button class="primary scan" disabled={scanning || installingAll} onclick={scan}>
-        <SearchCheck size={13} class={scanning ? 'spin' : ''} />
+        <Icon name="SearchCheck" size={13} class={scanning ? 'spin' : ''} />
         {scanning ? 'Scanning…' : 'Scan for updates'}
       </button>
     </div>
@@ -247,7 +244,7 @@
         disabled={selectedIds.size === 0 || installingAll}
         onclick={installSelected}
       >
-        <Download size={13} class={installingAll ? 'spin' : ''} />
+        <Icon name="Download" size={13} class={installingAll ? 'spin' : ''} />
         {installingAll ? 'Installing…' : `Install ${selectedIds.size}`}
       </button>
     </div>
@@ -280,13 +277,13 @@
     </div>
   {:else if !scanning && lastScan}
     <div class="empty">
-      <ShieldAlert size={28} />
+      <Icon name="ShieldAlert" size={28} />
       <p>No driver updates pending.</p>
       <span>Run a scan again later if you've installed new hardware.</span>
     </div>
   {:else if !scanning}
     <div class="empty">
-      <PackagePlus size={28} />
+      <Icon name="PackagePlus" size={28} />
       <p>Scan for driver updates.</p>
       <span>This contacts Windows Update directly. No third-party tools.</span>
     </div>
@@ -295,12 +292,12 @@
 {:else}
   <div class="hdr">
     <p class="lede">All currently installed signed drivers from <code>Win32_PnPSignedDriver</code>.</p>
-    <button class="refresh" onclick={loadAll}><RefreshCw size={13} class={loadingAll ? 'spin' : ''} /> Reload</button>
+    <button class="refresh" onclick={loadAll}><Icon name="RefreshCw" size={13} class={loadingAll ? 'spin' : ''} /> Reload</button>
   </div>
 
   <div class="filter-row">
     <div class="search">
-      <Search size={14} />
+      <Icon name="Search" size={14} />
       <input type="search" bind:value={queryAll} placeholder="Filter by device or provider…" />
     </div>
     <select bind:value={classFilter}>

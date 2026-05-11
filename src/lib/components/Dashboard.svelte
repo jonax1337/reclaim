@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ShieldCheck, Activity, Cpu, AlertOctagon, ShieldAlert } from 'lucide-svelte';
+  import Icon from './Icon.svelte';
   import { invoke } from '@tauri-apps/api/core';
   import { store } from '../stores/tweaks.svelte';
 
@@ -33,31 +33,31 @@
 
 <div class="stats">
   <div class="stat">
-    <div class="icon"><Activity size={16} strokeWidth={1.75} /></div>
+    <div class="icon"><Icon name="Activity" size={16} strokeWidth={1.75} /></div>
     <div class="value">{appliedCount}</div>
     <div class="label">Tweaks applied</div>
   </div>
 
   <div class="stat">
-    <div class="icon"><ShieldCheck size={16} strokeWidth={1.75} /></div>
+    <div class="icon"><Icon name="ShieldCheck" size={16} strokeWidth={1.75} /></div>
     <div class="value">{total}</div>
     <div class="label">Tweaks available</div>
   </div>
 
   {#if info}
     <div class="stat">
-      <div class="icon"><Cpu size={16} strokeWidth={1.75} /></div>
+      <div class="icon"><Icon name="Cpu" size={16} strokeWidth={1.75} /></div>
       <div class="value text">{osLabel || 'Windows'}</div>
       <div class="label">Build {info.build}</div>
     </div>
 
     {#if !info.is_admin}
       <div class="stat warn">
-        <div class="icon"><AlertOctagon size={16} strokeWidth={1.75} /></div>
+        <div class="icon"><Icon name="AlertOctagon" size={16} strokeWidth={1.75} /></div>
         <div class="value text">Not admin</div>
         <div class="label">Some tweaks will fail</div>
         <button class="elevate" onclick={restartAsAdmin} disabled={elevating} type="button">
-          <ShieldAlert size={13} strokeWidth={2} />
+          <Icon name="ShieldAlert" size={13} strokeWidth={2} />
           {elevating ? 'Elevating…' : 'Restart as Administrator'}
         </button>
       </div>

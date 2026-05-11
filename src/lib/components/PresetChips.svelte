@@ -1,11 +1,11 @@
 <script lang="ts">
+  import Icon from './Icon.svelte';
+  import type { FluentIconName } from '../icons';
   import { store } from '../stores/tweaks.svelte';
-  import { Sparkles, ShieldOff, Flame } from 'lucide-svelte';
-
   const presets = [
-    { key: 'minimal',     label: 'Minimal',     icon: Sparkles, hint: 'Show file extensions, disable telemetry & Bing.' },
-    { key: 'recommended', label: 'Recommended', icon: ShieldOff, hint: 'Balanced privacy + a clean UI.' },
-    { key: 'aggressive',  label: 'Aggressive',  icon: Flame,    hint: 'Strip Xbox, location, optional features.' }
+    { key: 'minimal',     label: 'Minimal',     icon: 'Sparkles' satisfies FluentIconName,  hint: 'Show file extensions, disable telemetry & Bing.' },
+    { key: 'recommended', label: 'Recommended', icon: 'ShieldOff' satisfies FluentIconName, hint: 'Balanced privacy + a clean UI.' },
+    { key: 'aggressive',  label: 'Aggressive',  icon: 'Flame' satisfies FluentIconName,     hint: 'Strip Xbox, location, optional features.' }
   ] as const;
 </script>
 
@@ -18,7 +18,7 @@
       title={p.hint}
       onclick={() => store.applyPreset(store.preset === p.key ? null : p.key)}
     >
-      <p.icon size={13} strokeWidth={2} />
+      <Icon name={p.icon} size={13} bold={store.preset === p.key} />
       {p.label}
     </button>
   {/each}
