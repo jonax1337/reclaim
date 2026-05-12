@@ -2,9 +2,11 @@
   import Icon from './Icon.svelte';
   import type { FluentIconName } from '../icons';
   import { invoke } from '@tauri-apps/api/core';
+  import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
   import { settings } from '../stores/settings.svelte';
   import { store } from '../stores/tweaks.svelte';
   import Toggle from './Toggle.svelte';
+  import type { ConfigExport } from '../types';
 
   const themes: { id: 'dark' | 'light' | 'system'; label: string; icon: FluentIconName }[] = [
     { id: 'dark',   label: 'Dark',   icon: 'Moon' },
@@ -17,6 +19,76 @@
       // %APPDATA%\Reclaim — open via explorer.
       await invoke('install_winget_app', { id: '__noop__' }).catch(() => {});
     } catch {}
+  }
+
+  let exporting = $state(false);
+  let importing = $state(false);
+  let creatingRP = $state(false);
+
+  async function exportConfig() {
+    exporting = true;
+    try {
+      const cfg = await invoke<ConfigExport>('export_config', { label: null });
+      const path = await saveDialog({
+        defaultPath: `reclaim-config-${new Date().toISOString().slice(0, 10)}.json`,
+        filters: [{ name: 'JSON', extensions: ['json'] }]
+      });
+      if (!path) return;
+      await invoke('write_text_file', { path, content: JSON.stringify(cfg, null, 2) });
+      store.toast({ kind: 'ok', msg: `Exported ${cfg.applied.length} applied tweak${cfg.applied.length === 1 ? '' : 's'}.` });
+    } catch (e) {
+      store.toast({ kind: 'err', msg: `Export failed: ${e}` });
+    } finally {
+      exporting = false;
+    }
+  }
+
+  async function importConfig() {
+    importing = true;
+    try {
+      const path = await openDialog({
+        multiple: false,
+        directory: false,
+        filters: [{ name: 'JSON', extensions: ['json'] }]
+      });
+      if (!path || Array.isArray(path)) return;
+      const text = await invoke<string>('read_text_file', { path });
+      const cfg = JSON.parse(text) as ConfigExport;
+      if (!cfg.version || !Array.isArray(cfg.applied)) {
+        throw new Error('Not a Reclaim config file.');
+      }
+      store.confirm({
+        title: 'Import configuration?',
+        body: `This will apply ${cfg.applied.length} tweak${cfg.applied.length === 1 ? '' : 's'} from the imported file. Tweaks already applied are skipped.`,
+        confirmLabel: 'Import & apply',
+        onconfirm: async () => {
+          const results = await invoke<[string, boolean, string | null][]>('import_config', { config: cfg });
+          const ok = results.filter((r) => r[1]).length;
+          const failed = results.length - ok;
+          store.toast({
+            kind: failed === 0 ? 'ok' : 'err',
+            msg: `Imported: ${ok} applied${failed > 0 ? `, ${failed} failed` : ''}.`
+          });
+          await store.refreshStates();
+        }
+      });
+    } catch (e) {
+      store.toast({ kind: 'err', msg: `Import failed: ${e}` });
+    } finally {
+      importing = false;
+    }
+  }
+
+  async function manualRestorePoint() {
+    creatingRP = true;
+    try {
+      await invoke('create_restore_point', { label: 'Reclaim manual checkpoint' });
+      store.toast({ kind: 'ok', msg: 'System Restore point created.' });
+    } catch (e) {
+      store.toast({ kind: 'err', msg: `Restore point failed: ${e}` });
+    } finally {
+      creatingRP = false;
+    }
   }
 </script>
 
@@ -64,6 +136,37 @@
         checked={settings.restorePointDefault}
         onchange={() => (settings.restorePointDefault = !settings.restorePointDefault)}
       />
+    </div>
+  </section>
+
+  <section>
+    <header><h2>Backup & Restore</h2></header>
+    <div class="row">
+      <div class="label">
+        <strong>Create System Restore Point now</strong>
+        <span>Manual checkpoint independent of any tweak. Useful before a Windows Update or driver install.</span>
+      </div>
+      <button class="action-btn" onclick={manualRestorePoint} disabled={creatingRP}>
+        {creatingRP ? 'Creating…' : 'Create restore point'}
+      </button>
+    </div>
+    <div class="row">
+      <div class="label">
+        <strong>Export configuration</strong>
+        <span>Save the IDs of every currently-applied tweak as JSON. Share between machines or back up before a reinstall.</span>
+      </div>
+      <button class="action-btn" onclick={exportConfig} disabled={exporting}>
+        {exporting ? 'Exporting…' : 'Export…'}
+      </button>
+    </div>
+    <div class="row">
+      <div class="label">
+        <strong>Import configuration</strong>
+        <span>Apply every tweak listed in a previously-exported JSON file. Already-applied tweaks are skipped.</span>
+      </div>
+      <button class="action-btn" onclick={importConfig} disabled={importing}>
+        {importing ? 'Importing…' : 'Import…'}
+      </button>
     </div>
   </section>
 
@@ -164,4 +267,16 @@
   .lede:last-child { margin-bottom: 0; }
   code { font-family: var(--font-mono); font-size: 12px; padding: 1px 6px; background: var(--surface-card-active); border-radius: 3px; }
   .loading { color: var(--text-tertiary); font-size: 13px; }
+  .action-btn {
+    padding: 7px 14px;
+    font-size: 12.5px;
+    background: var(--surface-card-active);
+    border: 1px solid var(--stroke-default);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--motion-fast) var(--ease-decel);
+  }
+  .action-btn:hover:not(:disabled) { background: var(--surface-card-hover); }
+  .action-btn:disabled { opacity: 0.6; cursor: progress; }
 </style>

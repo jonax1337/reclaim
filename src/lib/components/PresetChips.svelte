@@ -50,7 +50,7 @@
   }
   .chip:hover { background: var(--surface-card-hover); color: var(--text-primary); }
   .chip.active {
-    background: rgba(76,194,255,0.14);
+    background: var(--accent-overlay-strong);
     border-color: rgba(76,194,255,0.40);
     color: var(--accent-text);
   }

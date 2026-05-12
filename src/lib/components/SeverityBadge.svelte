@@ -28,6 +28,6 @@
   .badge.caution .dot { background: var(--severity-caution); }
   .badge.risky   .dot { background: var(--severity-risky); }
 
-  .badge.caution { color: #ffe680; border-color: rgba(252,225,0,0.18); }
-  .badge.risky   { color: var(--severity-risky); border-color: rgba(255,153,164,0.20); }
+  .badge.caution { color: var(--warning); border-color: var(--warning-overlay-strong); }
+  .badge.risky   { color: var(--severity-risky); border-color: var(--danger-stroke); }
 </style>

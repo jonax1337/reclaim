@@ -355,7 +355,7 @@
     padding: 1px 7px;
     border-radius: 999px;
     background: var(--accent-fill);
-    color: #000;
+    color: var(--text-on-accent);
     font-size: 10px;
     font-weight: 600;
   }
@@ -389,7 +389,7 @@
     padding: 7px 14px;
     border-radius: var(--radius-sm);
     background: var(--accent-fill);
-    color: #000;
+    color: var(--text-on-accent);
     font-size: 12px;
     font-weight: 600;
     border: 1px solid var(--accent-fill);
@@ -433,7 +433,7 @@
   .age.stale { color: var(--warning); }
   .warn {
     margin: 0 0 12px; padding: 8px 10px;
-    background: rgba(252,225,0,0.06); border: 1px solid rgba(252,225,0,0.18); border-radius: var(--radius-sm);
+    background: var(--warning-overlay-weak); border: 1px solid rgba(252,225,0,0.18); border-radius: var(--radius-sm);
     color: #ffe680; font-size: 12px;
   }
   .gpucard footer { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -476,14 +476,14 @@
   }
   .upd:hover { background: var(--surface-card-hover); }
   .upd.selected {
-    background: rgba(76,194,255,0.10);
+    background: var(--accent-overlay);
     border-color: rgba(76,194,255,0.40);
   }
   .checkbox {
     width: 18px; height: 18px; margin-top: 1px;
     border-radius: 4px;
     border: 1.5px solid var(--text-tertiary);
-    background: transparent; color: #000;
+    background: transparent; color: var(--text-on-accent);
     display: inline-flex; align-items: center; justify-content: center;
     cursor: pointer; padding: 0;
     transition: all var(--motion-fast) var(--ease-decel);
@@ -507,7 +507,7 @@
   }
   .mandatory {
     padding: 1px 7px; border-radius: 3px;
-    background: rgba(252,225,0,0.10);
+    background: var(--warning-overlay);
     color: var(--warning);
     font-size: 10px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.4px;
@@ -530,7 +530,7 @@
   }
   .search { position: relative; flex: 1; max-width: 380px; }
   .search input { padding-left: 28px; width: 100%; font-size: 13px; }
-  .search :global(svg) {
+  .search :global(.icon) {
     position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
     color: var(--text-tertiary);
   }

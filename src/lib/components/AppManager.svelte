@@ -218,7 +218,7 @@
   }
   .search { position: relative; flex: 1; max-width: 380px; }
   .search input { padding-left: 28px; width: 100%; font-size: 13px; }
-  .search :global(svg) {
+  .search :global(.icon) {
     position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
     color: var(--text-tertiary);
   }
@@ -280,14 +280,14 @@
     align-items: center;
     gap: 4px;
     padding: 4px 10px;
-    background: rgba(196,43,28,0.12);
+    background: var(--danger-overlay-weak);
     color: var(--severity-risky);
     border: 1px solid rgba(196,43,28,0.25);
     border-radius: var(--radius-sm);
     font-size: 11.5px;
     font-weight: 500;
   }
-  .danger-btn:hover { background: rgba(196,43,28,0.22); }
+  .danger-btn:hover { background: var(--danger-overlay); }
 
   .cat {
     margin: 18px 0 8px;
@@ -312,7 +312,7 @@
   }
   .row:hover { background: var(--surface-card-hover); }
   .row.selected {
-    background: rgba(76,194,255,0.10);
+    background: var(--accent-overlay);
     border-color: rgba(76,194,255,0.40);
   }
   .row:not(.installed) {
@@ -324,7 +324,7 @@
     border-radius: 4px;
     border: 1.5px solid var(--text-tertiary);
     background: transparent;
-    color: #000;
+    color: var(--text-on-accent);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -354,7 +354,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  .bloat-tag { background: rgba(252,225,0,0.10); color: var(--warning); border: 1px solid rgba(252,225,0,0.20); }
+  .bloat-tag { background: var(--warning-overlay); color: var(--warning); border: 1px solid rgba(252,225,0,0.20); }
   .removed { background: var(--surface-card-active); color: var(--text-tertiary); }
 
   .sub {
@@ -384,10 +384,10 @@
   .ibtn:hover:not([disabled]) { background: var(--surface-card-hover); }
   .ibtn:disabled { opacity: 0.5; cursor: progress; }
   .ibtn.primary:hover:not([disabled]) {
-    background: var(--accent-fill); color: #000; border-color: var(--accent-fill);
+    background: var(--accent-fill); color: var(--text-on-accent); border-color: var(--accent-fill);
   }
   .ibtn.danger:hover:not([disabled]) {
-    background: rgba(196,43,28,0.12);
+    background: var(--danger-overlay-weak);
     color: var(--severity-risky);
     border-color: rgba(196,43,28,0.30);
   }

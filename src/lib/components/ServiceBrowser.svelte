@@ -182,7 +182,7 @@
   }
   .search { position: relative; flex: 1; max-width: 320px; }
   .search input { padding-left: 28px; width: 100%; font-size: 13px; }
-  .search :global(svg) {
+  .search :global(.icon) {
     position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
     color: var(--text-tertiary);
   }
@@ -308,7 +308,7 @@
     transition: all var(--motion-fast) var(--ease-decel);
   }
   .icon-btn:hover:not([disabled]) {
-    background: var(--accent-fill); color: #000; border-color: var(--accent-fill);
+    background: var(--accent-fill); color: var(--text-on-accent); border-color: var(--accent-fill);
   }
   .icon-btn:disabled { opacity: 0.4; cursor: progress; }
 

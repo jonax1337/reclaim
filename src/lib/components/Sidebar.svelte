@@ -7,6 +7,7 @@
 
   const items: { key: ViewKey; label: string; icon: FluentIconName; group?: string }[] = [
     { key: 'dashboard',   label: 'Dashboard',  icon: 'LayoutDashboard', group: 'Overview' },
+    { key: 'profiles',    label: 'Profiles',   icon: 'Sparkles' },
     { key: 'privacy',     label: 'Privacy',    icon: 'ShieldOff',  group: 'Tweaks' },
     { key: 'bloatware',   label: 'Bloatware',  icon: 'Trash2' },
     { key: 'ai',          label: 'AI Features',icon: 'Sparkles' },

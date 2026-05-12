@@ -1,6 +1,6 @@
 <script lang="ts">
   import Icon from './Icon.svelte';
-  import type { Tweak } from '../types';
+  import type { DetectionState, Tweak, TweakStatus } from '../types';
   import SeverityBadge from './SeverityBadge.svelte';
   import Toggle from './Toggle.svelte';
 
@@ -8,22 +8,26 @@
     tweak,
     applied,
     selected,
+    status,
     onToggleApply,
     onToggleSelected
   }: {
     tweak: Tweak;
     applied: boolean;
     selected: boolean;
+    status?: TweakStatus | null;
     onToggleApply: () => void;
     onToggleSelected: () => void;
   } = $props();
+
+  let state: DetectionState = $derived(status?.state ?? (applied ? 'applied' : 'not_applied'));
 
   let opCount = $derived(
     tweak.registry.length + tweak.services.length + tweak.appx.length + (tweak.ps_apply ? 1 : 0)
   );
 </script>
 
-<article class="card" class:applied class:selected class:risky={tweak.severity === 'risky'}>
+<article class="card" class:applied class:selected class:modified={state === 'modified'} class:risky={tweak.severity === 'risky'}>
   <button
     type="button"
     class="select"
@@ -60,9 +64,15 @@
           <span class="preset">{p}</span>
         {/each}
       {/if}
-      {#if applied}
+      {#if state === 'applied'}
         <span class="dot-sep">·</span>
         <span class="applied-tag"><Icon name="Check" size={10} strokeWidth={3} /> Applied</span>
+      {:else if state === 'modified'}
+        <span class="dot-sep">·</span>
+        <span class="modified-tag" title="{status?.ops_matching ?? 0} of {status?.ops_total ?? 0} settings match the desired state. Another tool may have changed some of these.">
+          <Icon name="AlertTriangle" size={10} strokeWidth={2.5} />
+          Modified externally ({status?.ops_matching}/{status?.ops_total})
+        </span>
       {/if}
     </footer>
   </div>
@@ -95,18 +105,18 @@
     box-shadow: var(--shadow-card);
   }
   .card.applied {
-    background: rgba(76,194,255,0.045);
+    background: var(--accent-overlay-weak);
     border-color: rgba(76,194,255,0.18);
   }
   .card.applied:hover {
-    background: rgba(76,194,255,0.075);
+    background: var(--accent-overlay);
   }
   .card.selected {
-    background: rgba(76,194,255,0.10);
+    background: var(--accent-overlay);
     border-color: rgba(76,194,255,0.45);
     box-shadow: 0 0 0 1px rgba(76,194,255,0.25);
   }
-  .card.risky.applied { border-color: rgba(255,153,164,0.30); }
+  .card.risky.applied { border-color: var(--danger-stroke); }
 
   .select {
     width: 18px; height: 18px;
@@ -114,7 +124,7 @@
     border-radius: 4px;
     border: 1.5px solid var(--text-tertiary);
     background: transparent;
-    color: #000;
+    color: var(--text-on-accent);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -157,7 +167,7 @@
   .warn {
     margin-top: 8px;
     padding: 8px 10px;
-    background: rgba(252,225,0,0.06);
+    background: var(--warning-overlay-weak);
     border: 1px solid rgba(252,225,0,0.18);
     border-radius: var(--radius-sm);
     color: #ffe680;
@@ -196,6 +206,20 @@
     gap: 3px;
     color: var(--success);
     font-weight: 500;
+  }
+  .modified-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #ffc857;
+    font-weight: 500;
+  }
+  .card.modified {
+    border-color: rgba(255,200,87,0.32);
+    background: rgba(255,200,87,0.04);
+  }
+  .card.modified:hover {
+    background: rgba(255,200,87,0.07);
   }
 
   .action { padding-top: 1px; }

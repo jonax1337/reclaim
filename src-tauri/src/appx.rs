@@ -20,6 +20,14 @@ pub fn remove(op: &AppxOp) -> AppResult<()> {
     Ok(())
 }
 
+/// Snapshot of every AppX package name currently installed for any user.
+/// Cached pre-fetch enables fast per-tweak detection without re-spawning PowerShell.
+pub fn installed_names() -> AppResult<std::collections::HashSet<String>> {
+    let script = "Get-AppxPackage -AllUsers | Select-Object -ExpandProperty Name";
+    let out = powershell::run(script).unwrap_or_default();
+    Ok(out.lines().map(|l| l.trim().to_string()).filter(|s| !s.is_empty()).collect())
+}
+
 /// Reinstall a removed AppX package by re-registering its manifest if still on disk.
 pub fn reinstall(package: &str) -> AppResult<()> {
     let script = format!(

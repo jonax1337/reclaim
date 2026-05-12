@@ -127,6 +127,33 @@ pub fn apply(op: &RegOp) -> AppResult<()> {
     }
 }
 
+/// Compare a registry op's *current* value against the value the op would write.
+/// Returns true if the live registry already matches the desired state.
+pub fn matches_desired(op: &RegOp) -> AppResult<bool> {
+    let snap = snapshot(op)?;
+    if op.delete {
+        return Ok(!snap.existed);
+    }
+    if !snap.existed {
+        return Ok(false);
+    }
+    let live = match snap.value {
+        Some(v) => v,
+        None => return Ok(false),
+    };
+    Ok(values_equal(&op.kind, &live, &op.value))
+}
+
+fn values_equal(kind: &RegKind, live: &serde_json::Value, desired: &serde_json::Value) -> bool {
+    match kind {
+        RegKind::Dword | RegKind::QWord => live.as_u64() == desired.as_u64(),
+        RegKind::String | RegKind::ExpandString => {
+            live.as_str().map(|s| s.to_string()) == desired.as_str().map(|s| s.to_string())
+        }
+        RegKind::Binary => live == desired,
+    }
+}
+
 /// Restore a snapshot using the identity (hive/path/name) carried inside the snapshot itself.
 /// Used by revert so the current catalog ordering is irrelevant.
 pub fn restore_by_identity(snap: &RegSnapshot) -> AppResult<()> {

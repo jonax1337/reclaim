@@ -1,0 +1,42 @@
+[
+  {
+    "id": "privacy-max",
+    "name": "Privacy Max",
+    "icon": "ShieldCheck",
+    "description": "Hardened privacy: telemetry off, advertising ID disabled, app permissions locked down, Edge tracking minimised, Cortana disabled.",
+    "preset": "aggressive",
+    "categories": ["privacy", "ai", "edge"]
+  },
+  {
+    "id": "gaming",
+    "name": "Gaming",
+    "icon": "Cpu",
+    "description": "Turn off background services that compete with games for CPU/disk, disable Game Bar nags, prioritise GPU scheduler, kill the Xbox bloatware.",
+    "preset": "recommended",
+    "categories": ["gaming", "performance", "services"]
+  },
+  {
+    "id": "minimal",
+    "name": "Clean Install",
+    "icon": "Settings2",
+    "description": "Safe, reversible cleanup that anyone running a fresh Windows install would want. Only the safest tweaks — no risky changes.",
+    "preset": "minimal",
+    "categories": ["bloatware", "annoyances", "explorer"]
+  },
+  {
+    "id": "developer",
+    "name": "Developer Workstation",
+    "icon": "Code2",
+    "description": "Show file extensions, enable long paths, disable hibernation, surface developer-friendly Explorer settings, kill Windows Search indexing of dev folders.",
+    "preset": "recommended",
+    "categories": ["developer", "explorer", "performance"]
+  },
+  {
+    "id": "media-pc",
+    "name": "Media / HTPC",
+    "icon": "Monitor",
+    "description": "For a Windows box wired to a TV: kill notifications, disable lock screen ads, prevent the machine from sleeping, audio quality tweaks.",
+    "preset": "recommended",
+    "categories": ["annoyances", "audio", "power"]
+  }
+]

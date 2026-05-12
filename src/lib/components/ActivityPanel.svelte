@@ -51,7 +51,7 @@
     try {
       await invoke('revert_tweak', { id: e.id });
       entries = entries.filter((x) => x.id !== e.id);
-      const a = new Set(store.applied); a.delete(e.id); store.applied = a;
+      await store.refreshStates();
       store.toast({ kind: 'ok', msg: `Reverted: ${e.name}` });
     } catch (err) {
       store.toast({ kind: 'err', msg: `${e.name}: ${err}` });
@@ -182,9 +182,9 @@
     transition: all var(--motion-fast) var(--ease-decel);
   }
   .revert:hover:not([disabled]) {
-    background: rgba(255,153,164,0.10);
+    background: var(--danger-overlay-weak);
     color: var(--severity-risky);
-    border-color: rgba(255,153,164,0.30);
+    border-color: var(--danger-stroke);
   }
   .revert[disabled] { opacity: 0.5; cursor: progress; }
 

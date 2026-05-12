@@ -1,7 +1,24 @@
 <script lang="ts">
   import Icon from './Icon.svelte';
+  import Iconify from '@iconify/svelte';
   import { getCurrentWindow } from '@tauri-apps/api/window';
+  import { onMount } from 'svelte';
+
   const win = getCurrentWindow();
+  let maximized = $state(false);
+
+  onMount(() => {
+    win.isMaximized().then((v) => (maximized = v));
+    const unlisten = win.onResized(() => {
+      win.isMaximized().then((v) => (maximized = v));
+    });
+    return () => { unlisten.then((fn) => fn()); };
+  });
+
+  async function toggleMax() {
+    await win.toggleMaximize();
+    maximized = await win.isMaximized();
+  }
 </script>
 
 <div class="titlebar" data-tauri-drag-region>
@@ -14,7 +31,9 @@
 
   <div class="controls">
     <button class="ctl" aria-label="Minimize" onclick={() => win.minimize()}><Icon name="Minus" size={14} /></button>
-    <button class="ctl" aria-label="Maximize" onclick={() => win.toggleMaximize()}><Icon name="Square" size={12} /></button>
+    <button class="ctl" aria-label={maximized ? 'Restore' : 'Maximize'} onclick={toggleMax}>
+      <Iconify icon={maximized ? 'fluent:square-multiple-20-regular' : 'fluent:maximize-20-regular'} width={12} height={12} />
+    </button>
     <button class="ctl close" aria-label="Close" onclick={() => win.close()}><Icon name="X" size={14} /></button>
   </div>
 </div>

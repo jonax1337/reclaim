@@ -105,7 +105,7 @@
   .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
   .search { position: relative; flex: 1; max-width: 380px; }
   .search input { padding-left: 28px; width: 100%; font-size: 13px; }
-  .search :global(svg) { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); }
+  .search :global(.icon) { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); }
   .iconbtn { color: var(--text-secondary); padding: 7px 9px; border-radius: var(--radius-sm); background: var(--surface-card); border: 1px solid var(--stroke-subtle); }
   .iconbtn:hover { background: var(--surface-card-hover); color: var(--text-primary); }
   .iconbtn :global(.spin) { animation: spin 1s linear infinite; }

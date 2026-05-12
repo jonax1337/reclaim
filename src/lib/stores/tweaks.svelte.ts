@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { SystemInfo, Tweak, WingetApp } from '../types';
+import type { DetectionState, DriftEntry, SystemInfo, Tweak, TweakStatus, WingetApp } from '../types';
 
 export interface Toast {
   id: number;
@@ -19,15 +19,30 @@ export interface ConfirmRequest {
 
 class TweakStore {
   tweaks = $state<Tweak[]>([]);
-  applied = $state<Set<string>>(new Set());
+  /// Live detection states from the actual system. Keyed by tweak id.
+  states = $state<Map<string, TweakStatus>>(new Map());
+  /// Tweaks with a backup journal but no longer fully Applied — reverted by Windows Update etc.
+  drift = $state<DriftEntry[]>([]);
   selected = $state<Set<string>>(new Set());
   loading = $state(false);
+  detecting = $state(false);
   systemInfo = $state<SystemInfo | null>(null);
   search = $state('');
   preset = $state<'minimal' | 'recommended' | 'aggressive' | null>(null);
+  /// Filter to hide tweaks that are already applied. Off by default.
+  hideApplied = $state(false);
+  /// Filter to show only tweaks where the live state differs from default *and* desired.
+  showModifiedOnly = $state(false);
   toasts = $state<Toast[]>([]);
   apps = $state<WingetApp[]>([]);
   pendingConfirm = $state<ConfirmRequest | null>(null);
+
+  // Derived: Set of ids that are fully Applied. Kept for backward compat with existing UI.
+  applied = $derived.by(() => {
+    const s = new Set<string>();
+    for (const [id, st] of this.states) if (st.state === 'applied') s.add(id);
+    return s;
+  });
 
   private toastId = 0;
 
@@ -42,24 +57,31 @@ class TweakStore {
       this.tweaks = tw;
       this.systemInfo = info;
       this.apps = apps;
-      await this.refreshApplied();
+      await this.refreshStates();
     } finally {
       this.loading = false;
     }
   }
 
-  async refreshApplied() {
-    const states = await Promise.all(
-      this.tweaks.map((t) =>
-        invoke<{ id: string; applied: boolean }>('get_tweak_state', { id: t.id }).catch(() => ({
-          id: t.id,
-          applied: false
-        }))
-      )
-    );
-    const next = new Set<string>();
-    for (const s of states) if (s.applied) next.add(s.id);
-    this.applied = next;
+  /// Bulk-detect every tweak's live state from the actual system. Also refreshes drift list.
+  async refreshStates() {
+    this.detecting = true;
+    try {
+      const [statuses, drift] = await Promise.all([
+        invoke<TweakStatus[]>('detect_all_tweaks').catch(() => [] as TweakStatus[]),
+        invoke<DriftEntry[]>('list_drift').catch(() => [] as DriftEntry[])
+      ]);
+      const m = new Map<string, TweakStatus>();
+      for (const s of statuses) m.set(s.id, s);
+      this.states = m;
+      this.drift = drift;
+    } finally {
+      this.detecting = false;
+    }
+  }
+
+  stateOf(id: string): DetectionState {
+    return this.states.get(id)?.state ?? 'unknown';
   }
 
   toast(t: Omit<Toast, 'id'>) {
@@ -78,20 +100,28 @@ class TweakStore {
     this.pendingConfirm = req;
   }
 
+  private async refreshOne(id: string): Promise<void> {
+    const status = await invoke<TweakStatus | null>('detect_one_tweak', { id }).catch(() => null);
+    if (!status) return;
+    const m = new Map(this.states);
+    m.set(id, status);
+    this.states = m;
+  }
+
   private async applyOne(id: string): Promise<void> {
     await invoke('apply_tweak', { id });
-    const next = new Set(this.applied); next.add(id); this.applied = next;
+    await this.refreshOne(id);
   }
 
   private async revertOne(id: string): Promise<void> {
     await invoke('revert_tweak', { id });
-    const next = new Set(this.applied); next.delete(id); this.applied = next;
+    await this.refreshOne(id);
   }
 
   async toggle(id: string) {
     const tweak = this.tweaks.find((t) => t.id === id);
     if (!tweak) return;
-    const isApplied = this.applied.has(id);
+    const isApplied = this.stateOf(id) === 'applied';
 
     if (!isApplied && tweak.severity === 'risky') {
       this.confirm({
@@ -139,9 +169,25 @@ class TweakStore {
     }
     const next = new Set<string>();
     for (const t of this.tweaks) {
-      if (t.presets.includes(name) && !this.applied.has(t.id)) next.add(t.id);
+      if (t.presets.includes(name) && this.stateOf(t.id) !== 'applied') next.add(t.id);
     }
     this.selected = next;
+  }
+
+  /// Selects every tweak in a named profile (Gaming, Privacy Max, etc) that isn't applied.
+  selectProfile(ids: string[]) {
+    const next = new Set<string>();
+    for (const id of ids) {
+      if (this.stateOf(id) !== 'applied') next.add(id);
+    }
+    this.selected = next;
+  }
+
+  /// Re-applies any tweaks that have drifted (backup exists but state ≠ applied).
+  async reapplyDrift() {
+    const ids = this.drift.map((d) => d.id);
+    if (ids.length === 0) return;
+    await this.preflightAndApply(ids, false);
   }
 
   async applySelection(restorePoint: boolean) {
@@ -189,7 +235,7 @@ class TweakStore {
         kind: failed === 0 ? 'ok' : 'err',
         msg: `${ok} applied${failed > 0 ? `, ${failed} failed` : ''}.`
       });
-      await this.refreshApplied();
+      await this.refreshStates();
       this.selected = new Set();
     } catch (e) {
       this.toast({ kind: 'err', msg: `Batch failed: ${e}` });

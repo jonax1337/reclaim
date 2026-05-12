@@ -66,6 +66,12 @@ pub fn apply(op: &ServiceOp) -> AppResult<()> {
     Ok(())
 }
 
+/// True if the service's current StartType matches what the op wants.
+/// If the service doesn't exist or can't be queried, returns false (treated as not-applied).
+pub fn matches_desired(op: &ServiceOp) -> AppResult<bool> {
+    Ok(matches!(current_startup(&op.name)?, Some(s) if s == op.startup))
+}
+
 pub fn set_startup(name: &str, startup: ServiceStartup) -> AppResult<()> {
     apply(&ServiceOp {
         name: name.to_string(),

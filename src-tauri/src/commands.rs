@@ -3,7 +3,7 @@
 use crate::backup::{self, TweakBackup};
 use crate::catalog::{self, ServiceStartup, Tweak};
 use crate::error::{AppError, AppResult};
-use crate::{appx, drivers, hardware, inventory, powershell, registry, services, startup, system};
+use crate::{appx, detect, drivers, hardware, inventory, powershell, profiles, registry, services, startup, system};
 use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
@@ -203,6 +203,213 @@ fn now_unix() -> i64 {
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs() as i64)
         .unwrap_or(0)
+}
+
+// ---------- Live detection ----------
+
+#[tauri::command]
+pub fn detect_all_tweaks() -> AppResult<Vec<detect::TweakStatus>> {
+    detect::detect_all()
+}
+
+#[tauri::command]
+pub fn detect_one_tweak(id: String) -> AppResult<Option<detect::TweakStatus>> {
+    detect::detect_single(&id)
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct DriftEntry {
+    pub id: String,
+    pub name: String,
+    pub applied_at: i64,
+    pub state: detect::DetectionState,
+}
+
+/// Tweaks that have a backup journal (so we applied them) but whose live state
+/// is no longer fully Applied — Windows Update or another tool reverted them.
+#[tauri::command]
+pub fn list_drift() -> AppResult<Vec<DriftEntry>> {
+    let backups = backup::list_all()?;
+    let states = detect::detect_map()?;
+    let cat = catalog::catalog();
+    let mut out = Vec::new();
+    for (id, ts) in backups {
+        let Some(status) = states.get(&id) else { continue };
+        if matches!(status.state, detect::DetectionState::Applied | detect::DetectionState::Unknown) {
+            continue;
+        }
+        let name = cat.get(&id).map(|t| t.name.clone()).unwrap_or_else(|| id.clone());
+        out.push(DriftEntry { id, name, applied_at: ts, state: status.state });
+    }
+    Ok(out)
+}
+
+// ---------- File IO (used by export/import for paths chosen via the dialog plugin) ----------
+
+#[tauri::command]
+pub fn read_text_file(path: String) -> AppResult<String> {
+    std::fs::read_to_string(&path).map_err(|e| AppError::Other(format!("read {path}: {e}")))
+}
+
+#[tauri::command]
+pub fn write_text_file(path: String, content: String) -> AppResult<()> {
+    std::fs::write(&path, content).map_err(|e| AppError::Other(format!("write {path}: {e}")))
+}
+
+// ---------- Profiles ----------
+
+#[tauri::command]
+pub fn list_profiles() -> AppResult<Vec<profiles::ResolvedProfile>> {
+    profiles::list()
+}
+
+// ---------- Export / Import config ----------
+
+#[derive(Debug, Clone, Serialize, serde::Deserialize)]
+pub struct ConfigExport {
+    pub version: u32,
+    /// Unix seconds when the export was created.
+    pub exported_at: i64,
+    /// Optional human label entered by the user.
+    pub label: Option<String>,
+    /// IDs of every tweak currently considered Applied.
+    pub applied: Vec<String>,
+}
+
+#[tauri::command]
+pub fn export_config(label: Option<String>) -> AppResult<ConfigExport> {
+    let states = detect::detect_all()?;
+    let applied: Vec<String> = states
+        .into_iter()
+        .filter(|s| s.state == detect::DetectionState::Applied)
+        .map(|s| s.id)
+        .collect();
+    Ok(ConfigExport {
+        version: 1,
+        exported_at: now_unix(),
+        label,
+        applied,
+    })
+}
+
+/// Apply every tweak listed in the config that isn't already applied.
+/// Returns per-id results — same shape as apply_batch.
+#[tauri::command]
+pub fn import_config(config: ConfigExport) -> AppResult<Vec<(String, bool, Option<String>)>> {
+    let cat = catalog::catalog();
+    let states = detect::detect_map().unwrap_or_default();
+    let mut to_apply: Vec<String> = Vec::new();
+    for id in &config.applied {
+        if !cat.contains_key(id) {
+            continue;
+        }
+        let st = states.get(id).map(|s| s.state);
+        if matches!(st, Some(detect::DetectionState::Applied)) {
+            continue;
+        }
+        to_apply.push(id.clone());
+    }
+    apply_batch(to_apply)
+}
+
+// ---------- Diff (preview before apply) ----------
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum DiffOp {
+    Registry {
+        tweak_id: String,
+        tweak_name: String,
+        path: String,
+        name: String,
+        current: serde_json::Value,
+        desired: serde_json::Value,
+        will_change: bool,
+    },
+    Service {
+        tweak_id: String,
+        tweak_name: String,
+        service: String,
+        current: Option<String>,
+        desired: String,
+        will_change: bool,
+    },
+    Appx {
+        tweak_id: String,
+        tweak_name: String,
+        package: String,
+        currently_installed: bool,
+        will_change: bool,
+    },
+    Powershell {
+        tweak_id: String,
+        tweak_name: String,
+        snippet: String,
+    },
+}
+
+/// Preview every operation that applying the given tweaks would perform.
+/// Includes "no-op" entries (will_change = false) so the user sees what's already in place.
+#[tauri::command]
+pub fn diff_tweaks(ids: Vec<String>) -> AppResult<Vec<DiffOp>> {
+    let cat = catalog::catalog();
+    let installed = appx::installed_names().unwrap_or_default();
+    let mut out = Vec::new();
+    for id in &ids {
+        let Some(t) = cat.get(id) else { continue };
+        for op in &t.registry {
+            let snap = registry::snapshot(op).unwrap_or_else(|_| registry::RegSnapshot {
+                hive: Some(op.hive),
+                path: op.path.clone(),
+                name: op.name.clone(),
+                existed: false,
+                kind: None,
+                value: None,
+            });
+            let current = snap.value.clone().unwrap_or(serde_json::Value::Null);
+            let will_change = !registry::matches_desired(op).unwrap_or(false);
+            out.push(DiffOp::Registry {
+                tweak_id: id.clone(),
+                tweak_name: t.name.clone(),
+                path: format!("{:?}\\{}", op.hive, op.path),
+                name: op.name.clone(),
+                current,
+                desired: if op.delete { serde_json::Value::String("(delete)".into()) } else { op.value.clone() },
+                will_change,
+            });
+        }
+        for svc in &t.services {
+            let cur = services::current_startup(&svc.name).ok().flatten().map(|s| format!("{:?}", s));
+            let desired = format!("{:?}", svc.startup);
+            let will_change = !services::matches_desired(svc).unwrap_or(false);
+            out.push(DiffOp::Service {
+                tweak_id: id.clone(),
+                tweak_name: t.name.clone(),
+                service: svc.name.clone(),
+                current: cur,
+                desired,
+                will_change,
+            });
+        }
+        for a in &t.appx {
+            let installed_now = installed.contains(&a.package);
+            out.push(DiffOp::Appx {
+                tweak_id: id.clone(),
+                tweak_name: t.name.clone(),
+                package: a.package.clone(),
+                currently_installed: installed_now,
+                will_change: installed_now,
+            });
+        }
+        if let Some(ps) = &t.ps_apply {
+            out.push(DiffOp::Powershell {
+                tweak_id: id.clone(),
+                tweak_name: t.name.clone(),
+                snippet: ps.clone(),
+            });
+        }
+    }
+    Ok(out)
 }
 
 // ---------- Winget ----------

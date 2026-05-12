@@ -11,6 +11,8 @@ mod inventory;
 mod startup;
 mod hardware;
 mod drivers;
+mod detect;
+mod profiles;
 
 use tracing_subscriber::EnvFilter;
 
@@ -49,6 +51,15 @@ pub fn run() {
             commands::list_drivers,
             commands::scan_driver_updates,
             commands::install_driver_updates,
+            commands::detect_all_tweaks,
+            commands::detect_one_tweak,
+            commands::list_drift,
+            commands::list_profiles,
+            commands::export_config,
+            commands::import_config,
+            commands::diff_tweaks,
+            commands::read_text_file,
+            commands::write_text_file,
         ])
         .setup(|_app| {
             tracing::info!("reclaim started");

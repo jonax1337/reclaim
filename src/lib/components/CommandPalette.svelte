@@ -284,11 +284,11 @@
     font-size: 11px;
     font-weight: 500;
     border-radius: 999px;
-    background: rgba(76,194,255,0.14);
+    background: var(--accent-overlay-strong);
     color: var(--accent-text);
     border: 1px solid rgba(76,194,255,0.25);
   }
-  .badge.on { background: rgba(255,153,164,0.10); color: var(--severity-risky); border-color: rgba(255,153,164,0.25); }
+  .badge.on { background: var(--danger-overlay-weak); color: var(--severity-risky); border-color: var(--danger-stroke); }
   .badge.muted { background: var(--surface-card-active); color: var(--text-tertiary); border-color: var(--stroke-subtle); }
 
   footer {

@@ -18,6 +18,8 @@
   import StartupApps from '$lib/components/StartupApps.svelte';
   import HardwarePanel from '$lib/components/HardwarePanel.svelte';
   import DriversPanel from '$lib/components/DriversPanel.svelte';
+  import ProfilesPanel from '$lib/components/ProfilesPanel.svelte';
+  import DiffDialog from '$lib/components/DiffDialog.svelte';
   import { settings } from '$lib/stores/settings.svelte';
   import Skeleton from '$lib/components/Skeleton.svelte';
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
@@ -38,6 +40,7 @@
 
   const titles: Record<ViewKey, string> = {
     dashboard: 'Dashboard',
+    profiles: 'Profiles',
     privacy: 'Privacy & Telemetry',
     bloatware: 'Bloatware',
     ai: 'AI Features',
@@ -66,6 +69,7 @@
 
   const subtitles: Record<ViewKey, string> = {
     dashboard: '',
+    profiles: 'One-click curated bundles. The progress ring shows live system state.',
     privacy: 'Stop the diagnostic stream and the personalised-ad pipeline.',
     bloatware: 'Remove pre-installed UWP apps for all users — and stop them returning.',
     ai: 'Disable Copilot and Recall.',
@@ -121,6 +125,9 @@
         const q = store.search.toLowerCase();
         if (!t.name.toLowerCase().includes(q) && !t.description.toLowerCase().includes(q)) return false;
       }
+      const st = store.stateOf(t.id);
+      if (store.hideApplied && st === 'applied') return false;
+      if (store.showModifiedOnly && st !== 'modified') return false;
       return true;
     });
   });
@@ -150,9 +157,39 @@
         {#if subtitles[view]}<p class="sub">{subtitles[view]}</p>{/if}
       </div>
       {#if categoryFor[view] || view === 'services'}
-        <div class="search">
-          <Icon name="Search" size={14} />
-          <input type="search" placeholder="Filter tweaks…" bind:value={store.search} />
+        <div class="filter-row">
+          <div class="search">
+            <Icon name="Search" size={14} />
+            <input type="search" placeholder="Filter tweaks…" bind:value={store.search} />
+          </div>
+          <button
+            type="button"
+            class="filter-chip"
+            class:on={store.hideApplied}
+            onclick={() => (store.hideApplied = !store.hideApplied)}
+            title="Hide tweaks that are already applied"
+          >
+            <Icon name="Filter" size={12} /> Hide applied
+          </button>
+          <button
+            type="button"
+            class="filter-chip"
+            class:on={store.showModifiedOnly}
+            onclick={() => (store.showModifiedOnly = !store.showModifiedOnly)}
+            title="Show only tweaks where some settings differ from the desired state"
+          >
+            <Icon name="AlertTriangle" size={12} /> Modified only
+          </button>
+          <button
+            type="button"
+            class="filter-chip refresh"
+            onclick={() => store.refreshStates()}
+            disabled={store.detecting}
+            title="Re-scan the system to detect current tweak states"
+          >
+            <Icon name="RefreshCw" size={12} class={store.detecting ? 'spin' : ''} />
+            {store.detecting ? 'Scanning…' : 'Re-scan'}
+          </button>
         </div>
       {/if}
     </header>
@@ -170,12 +207,15 @@
                 {tweak}
                 applied={store.applied.has(tweak.id)}
                 selected={store.selected.has(tweak.id)}
+                status={store.states.get(tweak.id) ?? null}
                 onToggleApply={() => store.toggle(tweak.id)}
                 onToggleSelected={() => store.toggleSelected(tweak.id)}
               />
             {/each}
           </div>
         {/if}
+      {:else if view === 'profiles'}
+        <ProfilesPanel />
       {:else if view === 'apps'}
         <AppsPanel />
       {:else if view === 'app-manager'}
@@ -208,6 +248,7 @@
                   {tweak}
                   applied={store.applied.has(tweak.id)}
                   selected={store.selected.has(tweak.id)}
+                  status={store.states.get(tweak.id) ?? null}
                   onToggleApply={() => store.toggle(tweak.id)}
                   onToggleSelected={() => store.toggleSelected(tweak.id)}
                 />
@@ -235,6 +276,7 @@
                 {tweak}
                 applied={store.applied.has(tweak.id)}
                 selected={store.selected.has(tweak.id)}
+                status={store.states.get(tweak.id) ?? null}
                 onToggleApply={() => store.toggle(tweak.id)}
                 onToggleSelected={() => store.toggleSelected(tweak.id)}
               />
@@ -299,11 +341,40 @@
     color: var(--text-secondary);
     max-width: 70ch;
   }
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border: 1px solid var(--stroke-subtle);
+    border-radius: 999px;
+    background: var(--surface-card);
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all var(--motion-fast) var(--ease-decel);
+  }
+  .filter-chip:hover { background: var(--surface-card-hover); color: var(--text-primary); }
+  .filter-chip.on {
+    background: var(--accent-overlay);
+    border-color: rgba(76,194,255,0.45);
+    color: var(--text-primary);
+  }
+  .filter-chip[disabled] { opacity: 0.6; cursor: progress; }
+  .filter-chip :global(.spin) { animation: spin 0.9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
   .search { position: relative; width: 240px; flex-shrink: 0; }
   .search input { padding-left: 28px; width: 100%; font-size: 13px; }
-  .search :global(svg) {
+  .search :global(.icon) {
     position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
     color: var(--text-tertiary);
+    pointer-events: none;
   }
   .scroll {
     flex: 1;

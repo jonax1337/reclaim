@@ -2,11 +2,19 @@
   import Icon from './Icon.svelte';
   import { store } from '../stores/tweaks.svelte';
   import { settings } from '../stores/settings.svelte';
+  import DiffDialog from './DiffDialog.svelte';
 
   let restorePoint = $state(settings.restorePointDefault);
   let count = $derived(store.selected.size);
+  // Phase 5: auto-on for big batches or when any selected tweak is risky.
+  let hasRisky = $derived(
+    store.tweaks.some((t) => store.selected.has(t.id) && t.severity === 'risky')
+  );
+  let smartRP = $derived(count >= 5 || hasRisky);
+  let diffOpen = $state(false);
+  let selectedIds = $derived([...store.selected]);
 
-  $effect(() => { restorePoint = settings.restorePointDefault; });
+  $effect(() => { restorePoint = settings.restorePointDefault || smartRP; });
 </script>
 
 {#if count > 0}
@@ -25,12 +33,19 @@
       <span>Restore point first</span>
     </label>
 
+    <button class="ghost" onclick={() => (diffOpen = true)} title="Preview every system change before committing">
+      <Icon name="SearchCheck" size={13} strokeWidth={2} />
+      Preview
+    </button>
+
     <button class="primary" onclick={() => store.applySelection(restorePoint)}>
       <Icon name="Play" size={13} strokeWidth={2.25} />
       Apply selected
     </button>
   </div>
 {/if}
+
+<DiffDialog bind:open={diffOpen} ids={selectedIds} onclose={() => (diffOpen = false)} />
 
 <style>
   .bar {
@@ -102,7 +117,7 @@
 
   .primary {
     background: var(--accent-fill);
-    color: #000;
+    color: var(--text-on-accent);
     font-weight: 600;
     font-size: 13px;
     padding: 8px 16px;
@@ -115,4 +130,19 @@
   }
   .primary:hover { background: var(--accent-strong); }
   .primary:active { background: var(--accent-rest); transform: translateY(1px); }
+
+  .ghost {
+    padding: 7px 12px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--stroke-default);
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all var(--motion-fast) var(--ease-decel);
+  }
+  .ghost:hover { background: var(--surface-card-hover); color: var(--text-primary); }
 </style>

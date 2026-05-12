@@ -2,68 +2,240 @@
    Reclaim — Fluent / Mica design tokens
    ============================================================ */
 
+/* ============================================================
+   Official Fluent 2 design tokens (canonical names from
+   @fluentui/react-components). Custom Reclaim aliases below
+   point at these so any component code keeps working unchanged.
+   Source: https://react.fluentui.dev/?path=/docs/theme-color
+   ============================================================ */
 :root {
   color-scheme: dark;
 
-  /* Surfaces — designed to sit on top of a Mica window background */
-  --surface-base:        rgba(32, 32, 32, 0.55);
-  --surface-card:        rgba(255, 255, 255, 0.045);
-  --surface-card-hover:  rgba(255, 255, 255, 0.075);
-  --surface-card-active: rgba(255, 255, 255, 0.10);
-  --surface-overlay:     rgba(20, 20, 20, 0.85);
-  --surface-sidebar:     rgba(24, 24, 24, 0.35);
+  /* ----- Typography (Fluent 2 ramp) ----- */
+  --fontFamilyBase:      "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --fontFamilyNumeric:   "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --fontFamilyMonospace: "Cascadia Mono", ui-monospace, "JetBrains Mono", Menlo, monospace;
 
-  /* Stroke / dividers — Fluent uses very subtle 1px strokes */
-  --stroke-subtle:  rgba(255, 255, 255, 0.06);
-  --stroke-default: rgba(255, 255, 255, 0.10);
-  --stroke-strong:  rgba(255, 255, 255, 0.18);
+  --fontWeightRegular:  400;
+  --fontWeightMedium:   500;
+  --fontWeightSemibold: 600;
+  --fontWeightBold:     700;
+
+  --fontSizeBase100: 10px;
+  --fontSizeBase200: 12px;
+  --fontSizeBase300: 14px;
+  --fontSizeBase400: 16px;
+  --fontSizeBase500: 20px;
+  --fontSizeBase600: 24px;
+  --fontSizeHero700: 28px;
+  --fontSizeHero800: 32px;
+  --fontSizeHero900: 40px;
+  --fontSizeHero1000: 68px;
+
+  --lineHeightBase100: 14px;
+  --lineHeightBase200: 16px;
+  --lineHeightBase300: 20px;
+  --lineHeightBase400: 22px;
+  --lineHeightBase500: 28px;
+  --lineHeightBase600: 32px;
+  --lineHeightHero700: 36px;
+  --lineHeightHero800: 40px;
+  --lineHeightHero900: 52px;
+  --lineHeightHero1000: 92px;
+
+  /* ----- Spacing ramp ----- */
+  --spacingHorizontalNone:   0;
+  --spacingHorizontalXXS:    2px;
+  --spacingHorizontalXS:     4px;
+  --spacingHorizontalSNudge: 6px;
+  --spacingHorizontalS:      8px;
+  --spacingHorizontalMNudge: 10px;
+  --spacingHorizontalM:      12px;
+  --spacingHorizontalL:      16px;
+  --spacingHorizontalXL:     20px;
+  --spacingHorizontalXXL:    24px;
+  --spacingHorizontalXXXL:   32px;
+  --spacingVerticalNone:     0;
+  --spacingVerticalXXS:      2px;
+  --spacingVerticalXS:       4px;
+  --spacingVerticalSNudge:   6px;
+  --spacingVerticalS:        8px;
+  --spacingVerticalMNudge:   10px;
+  --spacingVerticalM:        12px;
+  --spacingVerticalL:        16px;
+  --spacingVerticalXL:       20px;
+  --spacingVerticalXXL:      24px;
+  --spacingVerticalXXXL:     32px;
+
+  /* ----- Border radius ----- */
+  --borderRadiusNone:     0;
+  --borderRadiusSmall:    2px;
+  --borderRadiusMedium:   4px;
+  --borderRadiusLarge:    6px;
+  --borderRadiusXLarge:   8px;
+  --borderRadiusCircular: 10000px;
+
+  /* ----- Stroke widths ----- */
+  --strokeWidthThin:    1px;
+  --strokeWidthThick:   2px;
+  --strokeWidthThicker: 3px;
+  --strokeWidthThickest: 4px;
+
+  /* ----- Motion: durations ----- */
+  --durationUltraFast: 50ms;
+  --durationFaster:    100ms;
+  --durationFast:      150ms;
+  --durationNormal:    200ms;
+  --durationGentle:    250ms;
+  --durationSlow:      300ms;
+  --durationSlower:    400ms;
+  --durationUltraSlow: 500ms;
+
+  /* ----- Motion: curves (Fluent 2 official cubic-beziers) ----- */
+  --curveAccelerateMax: cubic-bezier(0.9, 0.1, 1, 0.2);
+  --curveAccelerateMid: cubic-bezier(1, 0, 1, 1);
+  --curveAccelerateMin: cubic-bezier(0.8, 0, 0.78, 1);
+  --curveDecelerateMax: cubic-bezier(0.1, 0.9, 0.2, 1);
+  --curveDecelerateMid: cubic-bezier(0, 0, 0, 1);
+  --curveDecelerateMin: cubic-bezier(0.33, 0, 0.1, 1);
+  --curveEasyEaseMax:   cubic-bezier(0.8, 0, 0.2, 1);
+  --curveEasyEase:      cubic-bezier(0.33, 0, 0.67, 1);
+  --curveLinear:        cubic-bezier(0, 0, 1, 1);
+
+  /* ----- Shadows (Fluent 2 elevation ramp) ----- */
+  --shadow2:  0 0 2px rgba(0,0,0,0.12),  0 1px 2px rgba(0,0,0,0.14);
+  --shadow4:  0 0 2px rgba(0,0,0,0.12),  0 2px 4px rgba(0,0,0,0.14);
+  --shadow8:  0 0 2px rgba(0,0,0,0.12),  0 4px 8px rgba(0,0,0,0.14);
+  --shadow16: 0 0 2px rgba(0,0,0,0.12),  0 8px 16px rgba(0,0,0,0.14);
+  --shadow28: 0 0 8px rgba(0,0,0,0.20),  0 14px 28px rgba(0,0,0,0.24);
+  --shadow64: 0 0 8px rgba(0,0,0,0.20),  0 32px 64px rgba(0,0,0,0.24);
+
+  /* ----- Neutral colour ramp (Fluent 2 dark theme) ----- */
+  --colorNeutralBackground1:        rgba(32, 32, 32, 0.55);
+  --colorNeutralBackground1Hover:   rgba(45, 45, 45, 0.65);
+  --colorNeutralBackground1Pressed: rgba(28, 28, 28, 0.70);
+  --colorNeutralBackground2:        rgba(255, 255, 255, 0.045);
+  --colorNeutralBackground2Hover:   rgba(255, 255, 255, 0.075);
+  --colorNeutralBackground2Pressed: rgba(255, 255, 255, 0.10);
+  --colorNeutralBackground3:        rgba(255, 255, 255, 0.075);
+  --colorNeutralBackground4:        rgba(24, 24, 24, 0.35);
+  --colorNeutralBackgroundAlpha:    rgba(20, 20, 20, 0.85);
+
+  --colorNeutralForeground1:        rgba(255, 255, 255, 0.96);
+  --colorNeutralForeground2:        rgba(255, 255, 255, 0.72);
+  --colorNeutralForeground3:        rgba(255, 255, 255, 0.50);
+  --colorNeutralForeground4:        rgba(255, 255, 255, 0.32);
+  --colorNeutralForegroundDisabled: rgba(255, 255, 255, 0.32);
+  --colorNeutralForegroundOnBrand:  rgba(0, 0, 0, 0.92);
+
+  --colorNeutralStroke1:           rgba(255, 255, 255, 0.10);
+  --colorNeutralStroke2:           rgba(255, 255, 255, 0.06);
+  --colorNeutralStrokeAccessible:  rgba(255, 255, 255, 0.18);
+  --colorNeutralStrokeSubtle:      rgba(255, 255, 255, 0.06);
+
+  /* ----- Brand colour ramp (Win11 dark accent) ----- */
+  --colorBrandBackground:        #4cc2ff;
+  --colorBrandBackgroundHover:   #60cdff;
+  --colorBrandBackgroundPressed: #0078d4;
+  --colorBrandForeground1:       #60cdff;
+  --colorBrandForeground2:       #99ebff;
+  --colorBrandForegroundOnBrand: rgba(0, 0, 0, 0.92);
+  --colorBrandStroke1:           #4cc2ff;
+  --colorBrandBackgroundStatic:  #0078d4;
+  --colorCompoundBrandBackground:#4cc2ff;
+
+  /* ----- Status colour palettes ----- */
+  --colorPaletteGreenForeground1:  #6ccb5f;
+  --colorPaletteGreenBackground1:  rgba(108,203,95,0.10);
+  --colorPaletteYellowForeground1: #fce100;
+  --colorPaletteYellowBackground1: rgba(252,225,0,0.10);
+  --colorPaletteYellowBackground2: rgba(252,225,0,0.14);
+  --colorPaletteRedForeground1:    #ff99a4;
+  --colorPaletteRedForeground2:    #ff7080;
+  --colorPaletteRedBackground1:    rgba(255,153,164,0.10);
+  --colorPaletteRedBackground2:    rgba(255,153,164,0.18);
+  --colorPaletteRedBorderActive:   rgba(255,153,164,0.30);
+
+  --colorStatusSuccessForeground1: var(--colorPaletteGreenForeground1);
+  --colorStatusWarningForeground1: var(--colorPaletteYellowForeground1);
+  --colorStatusDangerForeground1:  var(--colorPaletteRedForeground1);
+
+  /* ============================================================
+     Reclaim aliases — point at the Fluent 2 tokens above.
+     All component CSS continues to use these names.
+     ============================================================ */
+
+  /* Surfaces */
+  --surface-base:        var(--colorNeutralBackground1);
+  --surface-card:        var(--colorNeutralBackground2);
+  --surface-card-hover:  var(--colorNeutralBackground2Hover);
+  --surface-card-active: var(--colorNeutralBackground2Pressed);
+  --surface-overlay:     var(--colorNeutralBackgroundAlpha);
+  --surface-sidebar:     var(--colorNeutralBackground4);
+
+  /* Stroke */
+  --stroke-subtle:  var(--colorNeutralStroke2);
+  --stroke-default: var(--colorNeutralStroke1);
+  --stroke-strong:  var(--colorNeutralStrokeAccessible);
 
   /* Text */
-  --text-primary:   rgba(255, 255, 255, 0.96);
-  --text-secondary: rgba(255, 255, 255, 0.72);
-  --text-tertiary:  rgba(255, 255, 255, 0.50);
-  --text-disabled:  rgba(255, 255, 255, 0.32);
-  --text-on-accent: #ffffff;
+  --text-primary:   var(--colorNeutralForeground1);
+  --text-secondary: var(--colorNeutralForeground2);
+  --text-tertiary:  var(--colorNeutralForeground3);
+  --text-disabled:  var(--colorNeutralForegroundDisabled);
+  --text-on-accent: var(--colorNeutralForegroundOnBrand);
 
-  /* Brand / state — Win11 system colours */
-  --accent-default: #60cdff;       /* Win11 dark-mode accent */
-  --accent-strong:  #4cc2ff;
-  --accent-rest:    #0078d4;
-  --accent-fill:    #4cc2ff;
-  --accent-text:    #99ebff;
+  /* Brand */
+  --accent-default: var(--colorBrandForeground1);
+  --accent-strong:  var(--colorBrandBackgroundHover);
+  --accent-rest:    var(--colorBrandBackgroundPressed);
+  --accent-fill:    var(--colorBrandBackground);
+  --accent-text:    var(--colorBrandForeground2);
 
-  --severity-safe:    #6ccb5f;
-  --severity-caution: #fce100;
-  --severity-risky:   #ff99a4;
+  /* Status */
+  --severity-safe:    var(--colorPaletteGreenForeground1);
+  --severity-caution: var(--colorPaletteYellowForeground1);
+  --severity-risky:   var(--colorPaletteRedForeground1);
+  --success:          var(--colorStatusSuccessForeground1);
+  --warning:          var(--colorStatusWarningForeground1);
+  --danger:           var(--colorStatusDangerForeground1);
+  --danger-strong:    var(--colorPaletteRedForeground2);
 
-  --success: #6ccb5f;
-  --warning: #fce100;
-  --danger:  #ff99a4;
+  /* Tinted overlays */
+  --accent-overlay-weak:   rgba(76,194,255,0.045);
+  --accent-overlay:        rgba(76,194,255,0.10);
+  --accent-overlay-strong: rgba(76,194,255,0.14);
+  --warning-overlay-weak:  rgba(252,225,0,0.06);
+  --warning-overlay:       var(--colorPaletteYellowBackground1);
+  --warning-overlay-strong:var(--colorPaletteYellowBackground2);
+  --danger-overlay-weak:   var(--colorPaletteRedBackground1);
+  --danger-overlay:        var(--colorPaletteRedBackground2);
+  --danger-stroke:         var(--colorPaletteRedBorderActive);
 
-  /* Radii — Fluent uses 4 / 8 */
-  --radius-sm: 4px;
-  --radius-md: 8px;
+  /* Radii */
+  --radius-sm: var(--borderRadiusMedium);
+  --radius-md: var(--borderRadiusXLarge);
   --radius-lg: 12px;
 
   /* Elevation */
-  --shadow-card: 0 2px 4px rgba(0,0,0,0.14), 0 0 2px rgba(0,0,0,0.12);
-  --shadow-flyout: 0 8px 16px rgba(0,0,0,0.36), 0 0 1px rgba(0,0,0,0.28);
+  --shadow-card:   var(--shadow4);
+  --shadow-flyout: var(--shadow16);
 
-  /* Motion — Fluent standard */
-  --motion-fast: 100ms;
-  --motion-normal: 200ms;
-  --motion-slow: 350ms;
-  --ease-decel: cubic-bezier(0.10, 0.90, 0.20, 1.00);
-  --ease-accel: cubic-bezier(0.70, 0.00, 1.00, 0.50);
+  /* Motion */
+  --motion-fast:   var(--durationFaster);
+  --motion-normal: var(--durationNormal);
+  --motion-slow:   var(--durationSlow);
+  --ease-decel:    var(--curveDecelerateMax);
+  --ease-accel:    var(--curveAccelerateMid);
 
-  /* Type scale */
-  --font-base: "Segoe UI Variable", "Segoe UI", Inter, system-ui, sans-serif;
-  --font-mono: "Cascadia Mono", ui-monospace, "JetBrains Mono", Menlo, monospace;
-  --font-display: 28px;
-  --font-title:   20px;
-  --font-subtitle:16px;
-  --font-body:    14px;
-  --font-caption: 12px;
+  /* Type aliases */
+  --font-base:     var(--fontFamilyBase);
+  --font-mono:     var(--fontFamilyMonospace);
+  --font-display:  var(--fontSizeHero700);
+  --font-title:    var(--fontSizeBase500);
+  --font-subtitle: var(--fontSizeBase400);
+  --font-body:     var(--fontSizeBase300);
+  --font-caption:  var(--fontSizeBase200);
 }
 
 * { box-sizing: border-box; }
@@ -136,38 +308,63 @@ input[type="text"]:focus, input[type="search"]:focus {
   transition: none !important;
 }
 
-/* ----- Light theme overrides ----- */
+/* ----- Light theme overrides (Fluent 2 Web Light) ----- */
 [data-theme="light"] {
   color-scheme: light;
 
-  --surface-base:        rgba(243, 243, 243, 0.65);
-  --surface-card:        rgba(255, 255, 255, 0.55);
-  --surface-card-hover:  rgba(255, 255, 255, 0.75);
-  --surface-card-active: rgba(0, 0, 0, 0.045);
-  --surface-overlay:     rgba(252, 252, 252, 0.92);
-  --surface-sidebar:     rgba(243, 243, 243, 0.50);
+  /* Fluent 2 light neutral ramp */
+  --colorNeutralBackground1:        rgba(243, 243, 243, 0.65);
+  --colorNeutralBackground1Hover:   rgba(255, 255, 255, 0.80);
+  --colorNeutralBackground1Pressed: rgba(0, 0, 0, 0.045);
+  --colorNeutralBackground2:        rgba(255, 255, 255, 0.55);
+  --colorNeutralBackground2Hover:   rgba(255, 255, 255, 0.75);
+  --colorNeutralBackground2Pressed: rgba(0, 0, 0, 0.045);
+  --colorNeutralBackground3:        rgba(255, 255, 255, 0.75);
+  --colorNeutralBackground4:        rgba(243, 243, 243, 0.50);
+  --colorNeutralBackgroundAlpha:    rgba(252, 252, 252, 0.92);
 
-  --stroke-subtle:  rgba(0, 0, 0, 0.06);
-  --stroke-default: rgba(0, 0, 0, 0.10);
-  --stroke-strong:  rgba(0, 0, 0, 0.18);
+  --colorNeutralForeground1:        rgba(0, 0, 0, 0.90);
+  --colorNeutralForeground2:        rgba(0, 0, 0, 0.65);
+  --colorNeutralForeground3:        rgba(0, 0, 0, 0.45);
+  --colorNeutralForeground4:        rgba(0, 0, 0, 0.30);
+  --colorNeutralForegroundDisabled: rgba(0, 0, 0, 0.30);
+  --colorNeutralForegroundOnBrand:  #ffffff;
 
-  --text-primary:   rgba(0, 0, 0, 0.90);
-  --text-secondary: rgba(0, 0, 0, 0.65);
-  --text-tertiary:  rgba(0, 0, 0, 0.45);
-  --text-disabled:  rgba(0, 0, 0, 0.30);
-  --text-on-accent: #ffffff;
+  --colorNeutralStroke1:           rgba(0, 0, 0, 0.10);
+  --colorNeutralStroke2:           rgba(0, 0, 0, 0.06);
+  --colorNeutralStrokeAccessible:  rgba(0, 0, 0, 0.18);
+  --colorNeutralStrokeSubtle:      rgba(0, 0, 0, 0.06);
 
-  --accent-default: #005fb8;
-  --accent-strong:  #0078d4;
-  --accent-rest:    #0078d4;
-  --accent-fill:    #0078d4;
-  --accent-text:    #003366;
+  /* Fluent 2 light brand ramp (Win11 Communication Blue) */
+  --colorBrandBackground:        #0078d4;
+  --colorBrandBackgroundHover:   #006cbf;
+  --colorBrandBackgroundPressed: #005a9e;
+  --colorBrandForeground1:       #005fb8;
+  --colorBrandForeground2:       #003366;
+  --colorBrandForegroundOnBrand: #ffffff;
+  --colorBrandStroke1:           #0078d4;
+  --colorBrandBackgroundStatic:  #0078d4;
+  --colorCompoundBrandBackground:#0078d4;
 
-  --severity-safe:    #0f7b0f;
-  --severity-caution: #b07900;
-  --severity-risky:   #c42b1c;
+  /* Status palettes — darker bases for light surfaces */
+  --colorPaletteGreenForeground1:  #0f7b0f;
+  --colorPaletteGreenBackground1:  rgba(15,123,15,0.10);
+  --colorPaletteYellowForeground1: #b07900;
+  --colorPaletteYellowBackground1: rgba(176,121,0,0.14);
+  --colorPaletteYellowBackground2: rgba(176,121,0,0.20);
+  --colorPaletteRedForeground1:    #c42b1c;
+  --colorPaletteRedForeground2:    #a32418;
+  --colorPaletteRedBackground1:    rgba(196,43,28,0.08);
+  --colorPaletteRedBackground2:    rgba(196,43,28,0.14);
+  --colorPaletteRedBorderActive:   rgba(196,43,28,0.30);
 
-  --success: #0f7b0f;
-  --warning: #b07900;
-  --danger:  #c42b1c;
+  /* Light-mode tinted overlays */
+  --accent-overlay-weak:   rgba(0,120,212,0.06);
+  --accent-overlay:        rgba(0,120,212,0.10);
+  --accent-overlay-strong: rgba(0,120,212,0.16);
+  --warning-overlay-weak:  rgba(176,121,0,0.08);
 }
+
+/* Fallback opaque background when Mica/transparency isn't available
+   (Mica only paints when the host window has an extended frame). */
+[data-theme="light"], [data-theme="light"] body { background-color: #f3f3f3; }

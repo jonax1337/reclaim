@@ -5,10 +5,23 @@
 
   let total = $derived(store.tweaks.length);
   let appliedCount = $derived(store.applied.size);
+  let modifiedCount = $derived([...store.states.values()].filter((s) => s.state === 'modified').length);
+  let driftCount = $derived(store.drift.length);
   let info = $derived(store.systemInfo);
   let osLabel = $derived(info?.os_name?.replace('Microsoft ', '') ?? '');
 
   let elevating = $state(false);
+  let reapplying = $state(false);
+
+  async function reapplyDrift() {
+    if (reapplying) return;
+    reapplying = true;
+    try {
+      await store.reapplyDrift();
+    } finally {
+      reapplying = false;
+    }
+  }
 
   async function restartAsAdmin() {
     if (elevating) return;
@@ -31,6 +44,19 @@
   </p>
 </div>
 
+{#if driftCount > 0}
+  <div class="drift">
+    <Icon name="AlertTriangle" size={16} />
+    <div class="drift-text">
+      <strong>{driftCount} previously-applied tweak{driftCount === 1 ? ' is' : 's are'} no longer in effect.</strong>
+      <span>Windows Update or another tool may have reverted them. Re-apply restores them from the saved journal.</span>
+    </div>
+    <button class="drift-btn" onclick={reapplyDrift} disabled={reapplying}>
+      {reapplying ? 'Re-applying…' : `Re-apply ${driftCount}`}
+    </button>
+  </div>
+{/if}
+
 <div class="stats">
   <div class="stat">
     <div class="icon"><Icon name="Activity" size={16} strokeWidth={1.75} /></div>
@@ -43,6 +69,14 @@
     <div class="value">{total}</div>
     <div class="label">Tweaks available</div>
   </div>
+
+  {#if modifiedCount > 0}
+    <div class="stat alert">
+      <div class="icon"><Icon name="AlertTriangle" size={16} strokeWidth={1.75} /></div>
+      <div class="value">{modifiedCount}</div>
+      <div class="label">Modified externally</div>
+    </div>
+  {/if}
 
   {#if info}
     <div class="stat">
@@ -152,7 +186,7 @@
     font-weight: 600;
     letter-spacing: 0.2px;
     color: var(--warning);
-    background: rgba(252,225,0,0.08);
+    background: var(--warning-overlay-weak);
     border: 1px solid rgba(252,225,0,0.32);
     border-radius: var(--radius-sm, 6px);
     cursor: pointer;
@@ -161,9 +195,49 @@
                 transform var(--motion-fast) var(--ease-decel);
   }
   .elevate:hover:not(:disabled) {
-    background: rgba(252,225,0,0.14);
+    background: var(--warning-overlay-strong);
     border-color: rgba(252,225,0,0.55);
   }
   .elevate:active:not(:disabled) { transform: translateY(1px); }
   .elevate:disabled { opacity: 0.6; cursor: progress; }
+
+  .stat.alert {
+    border-color: rgba(255,200,87,0.32);
+    background: linear-gradient(180deg, rgba(255,200,87,0.05), transparent 60%), var(--surface-card);
+  }
+  .stat.alert .value { color: #ffc857; }
+  .stat.alert .icon { color: #ffc857; opacity: 1; }
+
+  .drift {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    background: linear-gradient(180deg, rgba(255,200,87,0.08), rgba(255,200,87,0.02));
+    border: 1px solid rgba(255,200,87,0.32);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+  }
+  .drift > :global(svg) { color: #ffc857; }
+  .drift-text { display: flex; flex-direction: column; gap: 2px; }
+  .drift-text strong { font-size: 13px; font-weight: 600; }
+  .drift-text span { font-size: 12px; color: var(--text-secondary); line-height: 1.45; }
+  .drift-btn {
+    padding: 7px 14px;
+    background: rgba(255,200,87,0.18);
+    border: 1px solid rgba(255,200,87,0.45);
+    border-radius: var(--radius-sm);
+    color: #ffc857;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--motion-fast) var(--ease-decel);
+  }
+  .drift-btn:hover:not(:disabled) {
+    background: rgba(255,200,87,0.28);
+    border-color: rgba(255,200,87,0.65);
+  }
+  .drift-btn:disabled { opacity: 0.6; cursor: progress; }
 </style>

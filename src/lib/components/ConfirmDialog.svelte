@@ -118,7 +118,7 @@
     font-size: 13px;
     font-weight: 500;
     background: var(--accent-fill);
-    color: #000;
+    color: var(--text-on-accent);
     border: 1px solid var(--accent-fill);
     transition: background-color var(--motion-fast) var(--ease-decel);
   }
@@ -130,9 +130,9 @@
   }
   .btn.ghost:hover { background: var(--surface-card-hover); }
   .btn.danger {
-    background: #c42b1c;
-    border-color: #c42b1c;
-    color: #fff;
+    background: var(--danger);
+    border-color: var(--danger);
+    color: var(--text-on-accent);
   }
-  .btn.danger:hover { background: #a32418; border-color: #a32418; }
+  .btn.danger:hover { background: var(--danger-strong); border-color: var(--danger-strong); }
 </style>

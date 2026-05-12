@@ -84,7 +84,7 @@
   .hdr code { background: var(--surface-card-active); padding: 1px 6px; border-radius: 4px; font-size: 12px; font-family: var(--font-mono); }
   .search { position: relative; width: 280px; }
   .search input { padding-left: 28px; width: 100%; }
-  .search :global(svg) {
+  .search :global(.icon) {
     position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
     color: var(--text-tertiary);
   }
@@ -137,6 +137,6 @@
     color: var(--text-primary);
     transition: all var(--motion-fast) var(--ease-decel);
   }
-  .install:hover:not([disabled]) { background: var(--accent-fill); color: #000; border-color: var(--accent-fill); }
+  .install:hover:not([disabled]) { background: var(--accent-fill); color: var(--text-on-accent); border-color: var(--accent-fill); }
   .install[disabled] { opacity: 0.5; cursor: progress; }
 </style>

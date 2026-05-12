@@ -68,7 +68,7 @@
   .toggle:hover:not([disabled]) .thumb { background: var(--text-primary); }
   .toggle.on .thumb {
     left: 22px;
-    background: #000;
+    background: var(--text-on-accent);
     width: 14px;
     height: 14px;
   }

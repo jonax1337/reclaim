@@ -52,8 +52,75 @@ export interface WingetApp {
   homepage?: string | null;
 }
 
+export type DetectionState = 'applied' | 'not_applied' | 'modified' | 'unknown';
+
+export interface TweakStatus {
+  id: string;
+  state: DetectionState;
+  ops_total: number;
+  ops_matching: number;
+}
+
+export interface DriftEntry {
+  id: string;
+  name: string;
+  applied_at: number;
+  state: DetectionState;
+}
+
+export interface Profile {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  tweak_ids: string[];
+}
+
+export interface ConfigExport {
+  version: number;
+  exported_at: number;
+  label: string | null;
+  applied: string[];
+}
+
+export type DiffOp =
+  | {
+      kind: 'registry';
+      tweak_id: string;
+      tweak_name: string;
+      path: string;
+      name: string;
+      current: unknown;
+      desired: unknown;
+      will_change: boolean;
+    }
+  | {
+      kind: 'service';
+      tweak_id: string;
+      tweak_name: string;
+      service: string;
+      current: string | null;
+      desired: string;
+      will_change: boolean;
+    }
+  | {
+      kind: 'appx';
+      tweak_id: string;
+      tweak_name: string;
+      package: string;
+      currently_installed: boolean;
+      will_change: boolean;
+    }
+  | {
+      kind: 'powershell';
+      tweak_id: string;
+      tweak_name: string;
+      snippet: string;
+    };
+
 export type ViewKey =
   | 'dashboard'
+  | 'profiles'
   | 'privacy'
   | 'bloatware'
   | 'ai'
