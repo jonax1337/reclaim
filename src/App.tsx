@@ -192,7 +192,7 @@ export function App() {
             {showFilterRow && (
               <div className="filter-row">
                 <div className="search">
-                  <Icon name="Search" size={14} />
+                  <Icon name="Search" size={16} />
                   <input
                     type="search"
                     placeholder="Filter tweaks…"
@@ -206,7 +206,7 @@ export function App() {
                   onClick={() => setHideApplied(!hideApplied)}
                   title="Hide tweaks that are already applied"
                 >
-                  <Icon name="Filter" size={12} /> Hide applied
+                  <Icon name="Filter" size={16} /> Hide applied
                 </button>
                 <button
                   type="button"
@@ -214,7 +214,7 @@ export function App() {
                   onClick={() => setShowModifiedOnly(!showModifiedOnly)}
                   title="Show only tweaks where some settings differ from the desired state"
                 >
-                  <Icon name="AlertTriangle" size={12} /> Modified only
+                  <Icon name="AlertTriangle" size={16} /> Modified only
                 </button>
                 <button
                   type="button"
@@ -223,7 +223,7 @@ export function App() {
                   disabled={detecting}
                   title="Re-scan the system to detect current tweak states"
                 >
-                  <Icon name="RefreshCw" size={12} className={detecting ? 'spin' : ''} />
+                  <Icon name="RefreshCw" size={16} className={detecting ? 'spin' : ''} />
                   {detecting ? 'Scanning…' : 'Re-scan'}
                 </button>
               </div>

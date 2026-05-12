@@ -1,5 +1,5 @@
 .sidebar {
-  width: 240px;
+  width: 288px;
   padding: 8px 8px 16px;
   background: var(--surface-sidebar);
   border-right: 1px solid var(--stroke-subtle);
@@ -11,10 +11,11 @@
   height: 100%;
 }
 .sidebar .group {
-  margin: 14px 12px 6px;
-  font-size: 10.5px;
+  margin: 16px 16px 6px;
+  font-size: 12px;
+  line-height: 16px;
   text-transform: uppercase;
-  letter-spacing: 0.7px;
+  letter-spacing: 0.5px;
   color: var(--text-tertiary);
   font-weight: 600;
 }
@@ -25,44 +26,48 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 12px 8px 16px;
-  border-radius: var(--radius-md);
+  gap: 16px;
+  padding: 8px 12px 8px 20px;
+  height: 40px;
+  border-radius: var(--borderRadiusMedium);
   color: var(--text-secondary);
   transition:
-    background-color var(--motion-fast) var(--ease-decel),
-    color var(--motion-fast) var(--ease-decel);
+    background-color 83ms var(--ease-decel),
+    color 83ms var(--ease-decel);
   text-align: left;
   width: 100%;
   background: transparent;
   border: none;
   cursor: pointer;
   font: inherit;
+  font-size: 14px;
+  line-height: 20px;
 }
 .sidebar .nav-item:hover {
-  background: var(--surface-card-hover);
+  background: var(--colorNeutralBackground2);
   color: var(--text-primary);
 }
 .sidebar .nav-item.active {
-  background: var(--surface-card-active);
+  background: var(--colorNeutralBackground2);
   color: var(--text-primary);
+  font-weight: 500;
 }
+.sidebar .nav-item.active .icon { color: var(--accent-default); }
 .sidebar .indicator {
   position: absolute;
-  left: 4px;
+  left: 0;
   top: 50%;
   width: 3px;
   height: 0;
   border-radius: 2px;
-  background: var(--accent-default);
+  background: var(--accent-fill);
   transform: translateY(-50%);
-  transition: height var(--motion-normal) var(--ease-decel);
+  transition: height 200ms var(--ease-decel);
 }
-.sidebar .nav-item.active .indicator {
-  height: 16px;
-}
+.sidebar .nav-item.active .indicator { height: 18px; }
 .sidebar .label {
   flex: 1;
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 20px;
   font-weight: 400;
 }

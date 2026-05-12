@@ -43,7 +43,7 @@ export function Sidebar({ current, onChange }: { current: ViewKey; onChange: (v:
             onClick={() => onChange(item.key)}
           >
             <span className="indicator" aria-hidden />
-            <Icon name={item.icon} size={18} bold={current === item.key} />
+            <Icon name={item.icon} size={20} bold={current === item.key} />
             <span className="label">{item.label}</span>
           </button>
         </div>
