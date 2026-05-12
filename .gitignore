@@ -3,6 +3,7 @@ node_modules
 /.svelte-kit
 /yarn.lock
 /pnpm-lock.yaml
+/dist
 
 # Tauri
 /src-tauri/target
