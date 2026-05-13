@@ -1,9 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Icon } from './Icon';
+import {
+  Dialog,
+  DialogSurface,
+  Input,
+  Badge,
+  makeStyles,
+  mergeClasses,
+  shorthands,
+  tokens
+} from '@fluentui/react-components';
+import {
+  Search20Regular,
+  Board16Regular,
+  ToggleRight16Regular,
+  Box16Regular,
+  ArrowEnter16Regular
+} from '@fluentui/react-icons';
 import { useTweaks } from '../stores/tweaks';
 import type { ViewKey } from '../../types';
-import './CommandPalette.css';
 
 type Props = {
   open: boolean;
@@ -41,12 +56,112 @@ function fuzzy(text: string, q: string): boolean {
   return true;
 }
 
+const useStyles = makeStyles({
+  surface: {
+    width: 'min(620px, calc(100vw - 48px))',
+    maxWidth: 'min(620px, calc(100vw - 48px))',
+    padding: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    maxHeight: '70vh',
+    overflow: 'hidden'
+  },
+  inputRow: {
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalMNudge,
+    ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalL),
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
+    borderBottomColor: tokens.colorNeutralStroke2
+  },
+  input: {
+    flex: 1,
+    '& input': {
+      fontSize: tokens.fontSizeBase400
+    }
+  },
+  results: {
+    flex: 1,
+    overflowY: 'auto',
+    ...shorthands.padding(tokens.spacingVerticalXS)
+  },
+  empty: {
+    ...shorthands.padding(tokens.spacingVerticalXXXL, 0),
+    textAlign: 'center',
+    color: tokens.colorNeutralForeground3
+  },
+  item: {
+    display: 'grid',
+    gridTemplateColumns: '24px 1fr auto',
+    gridTemplateRows: 'auto auto',
+    columnGap: tokens.spacingHorizontalMNudge,
+    alignItems: 'center',
+    width: '100%',
+    ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: tokens.borderRadiusMedium,
+    textAlign: 'left',
+    color: tokens.colorNeutralForeground1,
+    cursor: 'pointer',
+    transitionDuration: tokens.durationFaster,
+    transitionTimingFunction: tokens.curveDecelerateMax,
+    transitionProperty: 'background-color'
+  },
+  cursor: { backgroundColor: tokens.colorSubtleBackgroundSelected },
+  itemIcon: {
+    gridRow: '1 / 3',
+    color: tokens.colorNeutralForeground3,
+    display: 'flex',
+    alignItems: 'center'
+  },
+  iconActive: { color: tokens.colorBrandForeground1 },
+  itemLabel: { fontSize: tokens.fontSizeBase300, fontWeight: tokens.fontWeightMedium },
+  itemHint: {
+    gridColumn: 2,
+    fontSize: tokens.fontSizeBase100,
+    color: tokens.colorNeutralForeground3,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: '100%'
+  },
+  badgeWrap: { gridRow: '1 / 3' },
+  footer: {
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalL,
+    ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalL),
+    borderTopWidth: '1px',
+    borderTopStyle: 'solid',
+    borderTopColor: tokens.colorNeutralStroke2,
+    fontSize: tokens.fontSizeBase100,
+    color: tokens.colorNeutralForeground3
+  },
+  ft: { display: 'inline-flex', alignItems: 'center', columnGap: tokens.spacingHorizontalXS },
+  right: { marginLeft: 'auto' },
+  kbd: {
+    fontFamily: tokens.fontFamilyMonospace,
+    fontSize: '10px',
+    ...shorthands.padding('2px', '6px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    borderRadius: tokens.borderRadiusSmall,
+    color: tokens.colorNeutralForeground2,
+    display: 'inline-flex',
+    alignItems: 'center',
+    columnGap: '2px'
+  }
+});
+
 export function CommandPalette({ open, onOpenChange, onNavigate }: Props) {
-  const tweaks = useTweaks((s) => s.tweaks);
-  const states = useTweaks((s) => s.states);
-  const apps = useTweaks((s) => s.apps);
-  const toggle = useTweaks((s) => s.toggle);
-  const toast = useTweaks((s) => s.toast);
+  const s = useStyles();
+  const tweaks = useTweaks((st) => st.tweaks);
+  const states = useTweaks((st) => st.states);
+  const apps = useTweaks((st) => st.apps);
+  const toggle = useTweaks((st) => st.toggle);
+  const toast = useTweaks((st) => st.toast);
 
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);
@@ -96,10 +211,10 @@ export function CommandPalette({ open, onOpenChange, onNavigate }: Props) {
     if (item.kind === 'nav') {
       onNavigate(item.id);
     } else if (item.kind === 'tweak') {
-      const tweak = tweaks.find((t) => t.id === item.id);
-      if (tweak) {
-        onNavigate(tweak.category as ViewKey);
-        await toggle(tweak.id);
+      const t = tweaks.find((tk) => tk.id === item.id);
+      if (t) {
+        onNavigate(t.category as ViewKey);
+        await toggle(t.id);
       }
     } else {
       try {
@@ -143,66 +258,70 @@ export function CommandPalette({ open, onOpenChange, onNavigate }: Props) {
     }
   }
 
-  if (!open) return null;
-
   return (
-    <>
-      <div className="cp-scrim" onClick={close} role="presentation" />
-      <div className="cp-palette" role="dialog" aria-modal="true" aria-label="Command palette">
-        <div className="cp-input-row">
-          <Icon name="Search" size={16} />
-          <input
+    <Dialog open={open} onOpenChange={(_, d) => onOpenChange(d.open)} modalType="modal">
+      <DialogSurface className={s.surface}>
+        <div className={s.inputRow}>
+          <Search20Regular />
+          <Input
             ref={inputRef}
+            className={s.input}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(_, d) => setQuery(d.value)}
             onKeyDown={onKeyDown}
             placeholder="Search tweaks, apps, pages…"
             autoComplete="off"
             spellCheck={false}
+            appearance="filled-darker"
           />
-          <kbd>esc</kbd>
+          <kbd className={s.kbd}>esc</kbd>
         </div>
 
-        <div className="cp-results">
+        <div className={s.results}>
           {results.length === 0 ? (
-            <p className="cp-empty">No matches.</p>
+            <p className={s.empty}>No matches.</p>
           ) : (
-            results.map((item, i) => (
-              <button
-                key={item.kind + ':' + item.id}
-                type="button"
-                data-cmd-idx={i}
-                className={`cp-item${i === cursor ? ' cursor' : ''}`}
-                onClick={() => void activate(item)}
-                onMouseEnter={() => setCursor(i)}
-              >
-                <span className="cp-icon">
-                  {item.kind === 'nav' ? <Icon name="LayoutDashboard" size={14} />
-                    : item.kind === 'tweak' ? <Icon name="ToggleRight" size={14} />
-                    : <Icon name="Package" size={14} />}
-                </span>
-                <span className="cp-label">{item.label}</span>
-                <span className="cp-hint">{item.hint}</span>
-                {item.kind === 'tweak' ? (
-                  <span className={`cp-badge${item.applied ? ' on' : ''}`}>
-                    {item.applied ? 'Revert' : 'Apply'}
+            results.map((item, i) => {
+              const isActive = i === cursor;
+              return (
+                <button
+                  key={item.kind + ':' + item.id}
+                  type="button"
+                  data-cmd-idx={i}
+                  className={mergeClasses(s.item, isActive && s.cursor)}
+                  onClick={() => void activate(item)}
+                  onMouseEnter={() => setCursor(i)}
+                >
+                  <span className={mergeClasses(s.itemIcon, isActive && s.iconActive)}>
+                    {item.kind === 'nav' ? <Board16Regular />
+                      : item.kind === 'tweak' ? <ToggleRight16Regular />
+                      : <Box16Regular />}
                   </span>
-                ) : item.kind === 'app' ? (
-                  <span className="cp-badge">Install</span>
-                ) : (
-                  <span className="cp-badge muted">Open</span>
-                )}
-              </button>
-            ))
+                  <span className={s.itemLabel}>{item.label}</span>
+                  <span className={s.itemHint}>{item.hint}</span>
+                  <span className={s.badgeWrap}>
+                    {item.kind === 'tweak' ? (
+                      <Badge appearance="tint" color={item.applied ? 'danger' : 'brand'} size="small">
+                        {item.applied ? 'Revert' : 'Apply'}
+                      </Badge>
+                    ) : item.kind === 'app' ? (
+                      <Badge appearance="tint" color="brand" size="small">Install</Badge>
+                    ) : (
+                      <Badge appearance="tint" color="subtle" size="small">Open</Badge>
+                    )}
+                  </span>
+                </button>
+              );
+            })
           )}
         </div>
 
-        <footer className="cp-footer">
-          <span className="cp-ft"><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
-          <span className="cp-ft"><kbd><Icon name="CornerDownLeft" size={10} /></kbd> select</span>
-          <span className="cp-ft right">{results.length} result{results.length === 1 ? '' : 's'}</span>
+        <footer className={s.footer}>
+          <span className={s.ft}><kbd className={s.kbd}>↑</kbd><kbd className={s.kbd}>↓</kbd> navigate</span>
+          <span className={s.ft}><kbd className={s.kbd}><ArrowEnter16Regular /></kbd> select</span>
+          <span className={mergeClasses(s.ft, s.right)}>{results.length} result{results.length === 1 ? '' : 's'}</span>
         </footer>
-      </div>
-    </>
+      </DialogSurface>
+    </Dialog>
   );
 }

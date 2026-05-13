@@ -1,21 +1,116 @@
 import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
-import { Switch, Button } from '@fluentui/react-components';
-import { Icon } from './Icon';
-import type { FluentIconName } from '../icons';
+import {
+  Card,
+  Switch,
+  Button,
+  Title3,
+  Body1,
+  Caption1,
+  Text,
+  Divider,
+  Spinner,
+  makeStyles,
+  mergeClasses,
+  shorthands,
+  tokens
+} from '@fluentui/react-components';
+import {
+  WeatherMoon20Regular, WeatherMoon20Filled,
+  WeatherSunny20Regular, WeatherSunny20Filled,
+  Desktop20Regular, Desktop20Filled,
+  ShieldCheckmark16Regular
+} from '@fluentui/react-icons';
+import type { FC } from 'react';
 import { useSettings, type Theme } from '../stores/settings';
 import { useTweaks } from '../stores/tweaks';
 import type { ConfigExport } from '../../types';
-import './SettingsPanel.css';
 
-const themes: { id: Theme; label: string; icon: FluentIconName }[] = [
-  { id: 'dark', label: 'Dark', icon: 'Moon' },
-  { id: 'light', label: 'Light', icon: 'Sun' },
-  { id: 'system', label: 'System', icon: 'Monitor' }
+type IconPair = { regular: FC; filled: FC };
+const themes: { id: Theme; label: string; icon: IconPair }[] = [
+  { id: 'dark', label: 'Dark', icon: { regular: WeatherMoon20Regular, filled: WeatherMoon20Filled } },
+  { id: 'light', label: 'Light', icon: { regular: WeatherSunny20Regular, filled: WeatherSunny20Filled } },
+  { id: 'system', label: 'System', icon: { regular: Desktop20Regular, filled: Desktop20Filled } }
 ];
 
+const useStyles = makeStyles({
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
+    gap: tokens.spacingHorizontalL
+  },
+  section: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: tokens.spacingVerticalS,
+    ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalL),
+    backgroundColor: tokens.colorNeutralBackground2
+  },
+  sectionTitle: { margin: 0, marginBottom: tokens.spacingVerticalS },
+  row: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    columnGap: tokens.spacingHorizontalL,
+    ...shorthands.padding(tokens.spacingVerticalS, 0)
+  },
+  rowStack: { flexDirection: 'column', alignItems: 'stretch', rowGap: tokens.spacingVerticalS },
+  label: { display: 'flex', flexDirection: 'column', rowGap: '2px', minWidth: 0, flex: 1 },
+  labelHead: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalXS,
+    color: tokens.colorNeutralForeground1
+  },
+  sub: { color: tokens.colorNeutralForeground3 },
+  seg: {
+    display: 'inline-flex',
+    backgroundColor: tokens.colorNeutralBackground3,
+    borderRadius: tokens.borderRadiusMedium,
+    ...shorthands.padding('2px'),
+    columnGap: '2px'
+  },
+  segBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalXS,
+    ...shorthands.padding(tokens.spacingVerticalXS, tokens.spacingHorizontalM),
+    ...shorthands.border('1px', 'solid', 'transparent'),
+    borderRadius: tokens.borderRadiusMedium,
+    backgroundColor: 'transparent',
+    color: tokens.colorNeutralForeground2,
+    cursor: 'pointer',
+    fontSize: tokens.fontSizeBase200,
+    ':hover': { backgroundColor: tokens.colorNeutralBackground3Hover }
+  },
+  segActive: {
+    backgroundColor: tokens.colorNeutralBackground1,
+    color: tokens.colorNeutralForeground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1)
+  },
+  dl: {
+    display: 'grid',
+    gridTemplateColumns: 'auto 1fr',
+    columnGap: tokens.spacingHorizontalL,
+    rowGap: tokens.spacingVerticalXS,
+    margin: 0
+  },
+  dt: { color: tokens.colorNeutralForeground3, fontSize: tokens.fontSizeBase200 },
+  dd: { margin: 0, color: tokens.colorNeutralForeground1, fontSize: tokens.fontSizeBase200 },
+  warn: { color: tokens.colorStatusWarningForeground1 },
+  loading: { display: 'inline-flex', alignItems: 'center', columnGap: tokens.spacingHorizontalS, color: tokens.colorNeutralForeground3 },
+  code: {
+    fontFamily: tokens.fontFamilyMonospace,
+    fontSize: tokens.fontSizeBase200,
+    ...shorthands.padding('1px', '5px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    borderRadius: tokens.borderRadiusSmall
+  }
+});
+
 export function SettingsPanel() {
+  const s = useStyles();
   const theme = useSettings((s) => s.theme);
   const setTheme = useSettings((s) => s.setTheme);
   const reduceMotion = useSettings((s) => s.reduceMotion);
@@ -102,129 +197,120 @@ export function SettingsPanel() {
   }
 
   return (
-    <div className="settings-panel">
-      <div className="grid">
-        <section>
-          <header>
-            <h2>Appearance</h2>
-          </header>
-          <div className="row theme-row">
-            <div className="label">
-              <strong>Theme</strong>
-              <span>Light mode is experimental — most surfaces are tuned for dark.</span>
-            </div>
-            <div className="seg">
-              {themes.map((t) => (
+    <div className={s.grid}>
+      <Card className={s.section} appearance="filled-alternative">
+        <Title3 as="h2" className={s.sectionTitle}>Appearance</Title3>
+        <div className={s.row}>
+          <div className={s.label}>
+            <Text weight="semibold">Theme</Text>
+            <Caption1 className={s.sub}>Light mode is experimental — most surfaces are tuned for dark.</Caption1>
+          </div>
+          <div className={s.seg} role="tablist">
+            {themes.map((t) => {
+              const active = theme === t.id;
+              const I = active ? t.icon.filled : t.icon.regular;
+              return (
                 <button
                   key={t.id}
-                  className={theme === t.id ? 'active' : ''}
+                  className={mergeClasses(s.segBtn, active && s.segActive)}
                   onClick={() => setTheme(t.id)}
+                  role="tab"
+                  aria-selected={active}
                 >
-                  <Icon name={t.icon} size={13} bold={theme === t.id} />
-                  {t.label}
+                  <I />{t.label}
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
+        </div>
 
-          <div className="row">
-            <div className="label">
-              <strong>Reduce motion</strong>
-              <span>Disable card hover-lift, toggle springs, palette transitions.</span>
-            </div>
-            <Switch
-              checked={reduceMotion}
-              onChange={(_, data) => setReduceMotion(!!data.checked)}
-            />
-          </div>
-        </section>
+        <Divider />
 
-        <section>
-          <header>
-            <h2>Safety</h2>
-          </header>
-          <div className="row">
-            <div className="label">
-              <strong>
-                <Icon name="ShieldCheck" size={13} /> Create restore point on batch apply
-              </strong>
-              <span>Default for the checkbox in the Apply bar. Single-tweak toggles are not affected.</span>
-            </div>
-            <Switch
-              checked={restorePointDefault}
-              onChange={(_, data) => setRestorePointDefault(!!data.checked)}
-            />
+        <div className={s.row}>
+          <div className={s.label}>
+            <Text weight="semibold">Reduce motion</Text>
+            <Caption1 className={s.sub}>Disable card hover-lift, toggle springs, palette transitions.</Caption1>
           </div>
-        </section>
+          <Switch checked={reduceMotion} onChange={(_, data) => setReduceMotion(!!data.checked)} />
+        </div>
+      </Card>
 
-        <section>
-          <header>
-            <h2>Backup &amp; Restore</h2>
-          </header>
-          <div className="row">
-            <div className="label">
-              <strong>Create System Restore Point now</strong>
-              <span>Manual checkpoint independent of any tweak. Useful before a Windows Update or driver install.</span>
-            </div>
-            <Button appearance="secondary" onClick={() => void manualRestorePoint()} disabled={creatingRP}>
-              {creatingRP ? 'Creating…' : 'Create restore point'}
-            </Button>
+      <Card className={s.section} appearance="filled-alternative">
+        <Title3 as="h2" className={s.sectionTitle}>Safety</Title3>
+        <div className={s.row}>
+          <div className={s.label}>
+            <Text weight="semibold" className={s.labelHead}>
+              <ShieldCheckmark16Regular /> Create restore point on batch apply
+            </Text>
+            <Caption1 className={s.sub}>Default for the checkbox in the Apply bar. Single-tweak toggles are not affected.</Caption1>
           </div>
-          <div className="row">
-            <div className="label">
-              <strong>Export configuration</strong>
-              <span>Save the IDs of every currently-applied tweak as JSON. Share between machines or back up before a reinstall.</span>
-            </div>
-            <Button appearance="secondary" onClick={() => void exportConfig()} disabled={exporting}>
-              {exporting ? 'Exporting…' : 'Export…'}
-            </Button>
-          </div>
-          <div className="row">
-            <div className="label">
-              <strong>Import configuration</strong>
-              <span>Apply every tweak listed in a previously-exported JSON file. Already-applied tweaks are skipped.</span>
-            </div>
-            <Button appearance="secondary" onClick={() => void importConfig()} disabled={importing}>
-              {importing ? 'Importing…' : 'Import…'}
-            </Button>
-          </div>
-        </section>
+          <Switch checked={restorePointDefault} onChange={(_, data) => setRestorePointDefault(!!data.checked)} />
+        </div>
+      </Card>
 
-        <section>
-          <header>
-            <h2>System</h2>
-          </header>
-          {systemInfo ? (
-            <dl>
-              <dt>OS</dt>
-              <dd>{systemInfo.os_name}</dd>
-              <dt>Build</dt>
-              <dd>{systemInfo.build}</dd>
-              <dt>Version</dt>
-              <dd>{systemInfo.version}</dd>
-              <dt>Running as admin</dt>
-              <dd className={!systemInfo.is_admin ? 'warn' : ''}>
-                {systemInfo.is_admin ? 'Yes' : 'No — restart as administrator for HKLM tweaks'}
-              </dd>
-            </dl>
-          ) : (
-            <p className="loading">Loading system info…</p>
-          )}
-        </section>
+      <Card className={s.section} appearance="filled-alternative">
+        <Title3 as="h2" className={s.sectionTitle}>Backup &amp; Restore</Title3>
+        <div className={s.row}>
+          <div className={s.label}>
+            <Text weight="semibold">Create System Restore Point now</Text>
+            <Caption1 className={s.sub}>Manual checkpoint independent of any tweak. Useful before a Windows Update or driver install.</Caption1>
+          </div>
+          <Button appearance="secondary" onClick={() => void manualRestorePoint()} disabled={creatingRP}>
+            {creatingRP ? 'Creating…' : 'Create restore point'}
+          </Button>
+        </div>
+        <Divider />
+        <div className={s.row}>
+          <div className={s.label}>
+            <Text weight="semibold">Export configuration</Text>
+            <Caption1 className={s.sub}>Save the IDs of every currently-applied tweak as JSON. Share between machines or back up before a reinstall.</Caption1>
+          </div>
+          <Button appearance="secondary" onClick={() => void exportConfig()} disabled={exporting}>
+            {exporting ? 'Exporting…' : 'Export…'}
+          </Button>
+        </div>
+        <Divider />
+        <div className={s.row}>
+          <div className={s.label}>
+            <Text weight="semibold">Import configuration</Text>
+            <Caption1 className={s.sub}>Apply every tweak listed in a previously-exported JSON file. Already-applied tweaks are skipped.</Caption1>
+          </div>
+          <Button appearance="secondary" onClick={() => void importConfig()} disabled={importing}>
+            {importing ? 'Importing…' : 'Import…'}
+          </Button>
+        </div>
+      </Card>
 
-        <section>
-          <header>
-            <h2>About</h2>
-          </header>
-          <p className="lede">
-            Reclaim <code>v0.1.0</code> · Tauri 2 + React 18 · MIT.
-          </p>
-          <p className="lede">
-            Tweak backups live in <code>%APPDATA%\Reclaim\backups\</code> — one JSON per applied tweak,
-            with the original registry values needed for revert.
-          </p>
-        </section>
-      </div>
+      <Card className={s.section} appearance="filled-alternative">
+        <Title3 as="h2" className={s.sectionTitle}>System</Title3>
+        {systemInfo ? (
+          <dl className={s.dl}>
+            <dt className={s.dt}>OS</dt>
+            <dd className={s.dd}>{systemInfo.os_name}</dd>
+            <dt className={s.dt}>Build</dt>
+            <dd className={s.dd}>{systemInfo.build}</dd>
+            <dt className={s.dt}>Version</dt>
+            <dd className={s.dd}>{systemInfo.version}</dd>
+            <dt className={s.dt}>Running as admin</dt>
+            <dd className={mergeClasses(s.dd, !systemInfo.is_admin && s.warn)}>
+              {systemInfo.is_admin ? 'Yes' : 'No — restart as administrator for HKLM tweaks'}
+            </dd>
+          </dl>
+        ) : (
+          <span className={s.loading}><Spinner size="tiny" /> Loading system info…</span>
+        )}
+      </Card>
+
+      <Card className={s.section} appearance="filled-alternative">
+        <Title3 as="h2" className={s.sectionTitle}>About</Title3>
+        <Body1 className={s.sub}>
+          Reclaim <code className={s.code}>v0.1.0</code> · Tauri 2 + React 18 · MIT.
+        </Body1>
+        <Body1 className={s.sub}>
+          Tweak backups live in <code className={s.code}>%APPDATA%\Reclaim\backups\</code> — one JSON per applied tweak,
+          with the original registry values needed for revert.
+        </Body1>
+      </Card>
     </div>
   );
 }

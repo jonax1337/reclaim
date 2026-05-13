@@ -130,7 +130,6 @@ export type ViewKey =
   | 'gaming'
   | 'services'
   | 'apps'
-  | 'app-manager'
   | 'startup'
   | 'hardware'
   | 'drivers'

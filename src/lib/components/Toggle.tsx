@@ -1,4 +1,4 @@
-import './Toggle.css';
+import { Switch } from '@fluentui/react-components';
 
 type Props = {
   checked: boolean;
@@ -9,16 +9,11 @@ type Props = {
 
 export function Toggle({ checked, disabled = false, label = 'Toggle', onChange }: Props) {
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
+    <Switch
+      checked={checked}
       disabled={disabled}
-      className={`toggle${checked ? ' on' : ''}`}
-      onClick={() => onChange?.()}
-    >
-      <span className="thumb" />
-    </button>
+      aria-label={label}
+      onChange={() => onChange?.()}
+    />
   );
 }

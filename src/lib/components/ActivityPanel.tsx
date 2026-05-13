@@ -1,10 +1,24 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Icon } from './Icon';
+import {
+  Card,
+  Button,
+  Body1,
+  Caption1,
+  PresenceBadge,
+  Text,
+  makeStyles,
+  shorthands,
+  tokens
+} from '@fluentui/react-components';
+import {
+  ArrowClockwise16Regular,
+  ArrowUndo16Regular,
+  MailInbox20Regular
+} from '@fluentui/react-icons';
 import { SeverityBadge } from './SeverityBadge';
 import { useTweaks } from '../stores/tweaks';
 import type { Severity } from '../../types';
-import './ActivityPanel.css';
 
 interface ActivityEntry {
   id: string;
@@ -29,7 +43,71 @@ function relative(unix: number): string {
   return new Date(unix * 1000).toLocaleDateString();
 }
 
+const useStyles = makeStyles({
+  hdr: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    columnGap: tokens.spacingHorizontalL,
+    marginBottom: tokens.spacingVerticalM
+  },
+  lede: { flex: 1, maxWidth: '78ch', color: tokens.colorNeutralForeground2 },
+  spin: {
+    animationName: { from: { transform: 'rotate(0deg)' }, to: { transform: 'rotate(360deg)' } },
+    animationDuration: '900ms',
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'linear'
+  },
+  empty: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    rowGap: tokens.spacingVerticalS,
+    ...shorthands.padding('64px', 0),
+    color: tokens.colorNeutralForeground3,
+    textAlign: 'center'
+  },
+  list: { display: 'flex', flexDirection: 'column', rowGap: tokens.spacingVerticalS },
+  item: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalL,
+    ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalL),
+    backgroundColor: tokens.colorNeutralBackground2
+  },
+  left: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', rowGap: tokens.spacingVerticalXS },
+  nameRow: { display: 'flex', alignItems: 'center', columnGap: tokens.spacingHorizontalS },
+  meta: {
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalS,
+    rowGap: tokens.spacingVerticalXS,
+    flexWrap: 'wrap',
+    color: tokens.colorNeutralForeground3
+  },
+  cat: {
+    ...shorthands.padding('1px', '7px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    borderRadius: tokens.borderRadiusSmall,
+    textTransform: 'capitalize',
+    fontSize: tokens.fontSizeBase100
+  },
+  id: {
+    fontFamily: tokens.fontFamilyMonospace,
+    fontSize: tokens.fontSizeBase100,
+    color: tokens.colorNeutralForeground4
+  },
+  code: {
+    fontFamily: tokens.fontFamilyMonospace,
+    fontSize: tokens.fontSizeBase200,
+    ...shorthands.padding('1px', '5px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    borderRadius: tokens.borderRadiusSmall
+  }
+});
+
 export function ActivityPanel() {
+  const s = useStyles();
   const refreshStates = useTweaks((s) => s.refreshStates);
   const toast = useTweaks((s) => s.toast);
 
@@ -78,45 +156,51 @@ export function ActivityPanel() {
 
   return (
     <>
-      <div className="act-hdr">
-        <p className="act-lede">
-          Every applied tweak is journalled to <code>%APPDATA%\Reclaim\backups\</code>.
+      <div className={s.hdr}>
+        <Body1 className={s.lede}>
+          Every applied tweak is journalled to <code className={s.code}>%APPDATA%\Reclaim\backups\</code>.
           Reverting restores the original registry values, service start types, and re-registers AppX packages.
-        </p>
-        <button className="act-refresh" onClick={() => void load()}>
-          <Icon name="RefreshCw" size={13} className={loading ? 'spin' : ''} />
+        </Body1>
+        <Button
+          appearance="secondary"
+          icon={<ArrowClockwise16Regular className={loading ? s.spin : undefined} />}
+          onClick={() => void load()}
+        >
           Reload
-        </button>
+        </Button>
       </div>
 
       {entries.length === 0 && !loading ? (
-        <div className="act-empty">
-          <Icon name="Inbox" size={28} />
-          <p>No tweaks applied yet.</p>
-          <span>Apply something — it will show up here so you can roll it back later.</span>
+        <div className={s.empty}>
+          <MailInbox20Regular />
+          <Text weight="semibold">No tweaks applied yet.</Text>
+          <Caption1>Apply something — it will show up here so you can roll it back later.</Caption1>
         </div>
       ) : (
-        <div className="act-list">
+        <div className={s.list}>
           {entries.map((e) => (
-            <div className="act-item" key={e.id}>
-              <div className="act-left">
-                <strong>{e.name}</strong>
-                <div className="act-meta">
+            <Card key={e.id} className={s.item} appearance="filled-alternative">
+              <div className={s.left}>
+                <div className={s.nameRow}>
+                  <PresenceBadge status="available" size="small" />
+                  <Text weight="semibold">{e.name}</Text>
+                </div>
+                <div className={s.meta}>
                   {e.severity && <SeverityBadge level={e.severity as Severity} />}
-                  {e.category && <span className="act-cat">{e.category}</span>}
-                  <span className="act-time">{relative(e.applied_at)}</span>
-                  <code className="act-id">{e.id}</code>
+                  {e.category && <span className={s.cat}>{e.category}</span>}
+                  <Caption1>{relative(e.applied_at)}</Caption1>
+                  <code className={s.id}>{e.id}</code>
                 </div>
               </div>
-              <button
-                className="act-revert"
+              <Button
+                appearance="secondary"
+                icon={<ArrowUndo16Regular />}
                 disabled={busy.has(e.id)}
                 onClick={() => void revert(e)}
               >
-                <Icon name="Undo2" size={13} />
                 Revert
-              </button>
-            </div>
+              </Button>
+            </Card>
           ))}
         </div>
       )}

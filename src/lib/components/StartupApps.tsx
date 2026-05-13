@@ -1,9 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Switch } from '@fluentui/react-components';
-import { Icon } from './Icon';
+import {
+  Card,
+  Switch,
+  Button,
+  SearchBox,
+  Caption1,
+  Text,
+  makeStyles,
+  mergeClasses,
+  shorthands,
+  tokens
+} from '@fluentui/react-components';
+import { ArrowClockwise16Regular } from '@fluentui/react-icons';
 import { useTweaks } from '../stores/tweaks';
-import './StartupApps.css';
 
 interface StartupItem {
   name: string;
@@ -13,7 +23,68 @@ interface StartupItem {
   enabled: boolean;
 }
 
+const useStyles = makeStyles({
+  toolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalS,
+    rowGap: tokens.spacingVerticalS,
+    flexWrap: 'wrap',
+    marginBottom: tokens.spacingVerticalM
+  },
+  search: { flex: 1, minWidth: '200px' },
+  spin: {
+    animationName: { from: { transform: 'rotate(0deg)' }, to: { transform: 'rotate(360deg)' } },
+    animationDuration: '900ms',
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'linear'
+  },
+  meta: { color: tokens.colorNeutralForeground3, marginBottom: tokens.spacingVerticalM },
+  list: { display: 'flex', flexDirection: 'column', rowGap: tokens.spacingVerticalS },
+  row: {
+    display: 'grid',
+    gridTemplateColumns: '1fr auto',
+    columnGap: tokens.spacingHorizontalL,
+    alignItems: 'center',
+    ...shorthands.padding(tokens.spacingVerticalM, tokens.spacingHorizontalL),
+    backgroundColor: tokens.colorNeutralBackground2
+  },
+  disabled: { opacity: 0.6 },
+  meta2: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: '2px',
+    minWidth: 0
+  },
+  cmd: {
+    fontFamily: tokens.fontFamilyMonospace,
+    fontSize: tokens.fontSizeBase100,
+    color: tokens.colorNeutralForeground3,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
+  },
+  sub: {
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalS,
+    color: tokens.colorNeutralForeground3,
+    fontSize: tokens.fontSizeBase100
+  },
+  tag: {
+    ...shorthands.padding('1px', '7px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    borderRadius: tokens.borderRadiusSmall
+  },
+  empty: {
+    textAlign: 'center',
+    color: tokens.colorNeutralForeground3,
+    ...shorthands.padding('48px', 0)
+  }
+});
+
 export function StartupApps() {
+  const s = useStyles();
   const toast = useTweaks((s) => s.toast);
 
   const [items, setItems] = useState<StartupItem[]>([]);
@@ -82,56 +153,55 @@ export function StartupApps() {
   }
 
   return (
-    <div className="startup-apps">
-      <div className="toolbar">
-        <div className="search">
-          <Icon name="Search" size={14} />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filter startup items…"
-          />
-        </div>
-        <button className="iconbtn" onClick={load} title="Reload">
-          <Icon name="RefreshCw" size={14} className={loading ? 'spin' : ''} />
-        </button>
+    <div>
+      <div className={s.toolbar}>
+        <SearchBox
+          className={s.search}
+          value={query}
+          onChange={(_, d) => setQuery(d.value)}
+          placeholder="Filter startup items…"
+        />
+        <Button
+          appearance="outline"
+          icon={<ArrowClockwise16Regular className={loading ? s.spin : undefined} />}
+          onClick={load}
+        >
+          Reload
+        </Button>
       </div>
 
-      <p className="meta">
+      <Caption1 className={s.meta}>
         {filtered.length} of {items.length} startup item{items.length === 1 ? '' : 's'}
-      </p>
+      </Caption1>
 
-      <div className="list">
+      <div className={s.list}>
         {filtered.map((item) => {
           const key = `${item.source}::${item.name}`;
-          const rowClass = ['row', !item.enabled ? 'disabled' : ''].filter(Boolean).join(' ');
           return (
-            <article
+            <Card
               key={`${item.source}:${item.user}:${item.name}`}
-              className={rowClass}
+              className={mergeClasses(s.row, !item.enabled && s.disabled)}
+              appearance="filled-alternative"
             >
-              <div className="meta-cell">
-                <strong>{item.name}</strong>
-                <code className="cmd">{item.command}</code>
-                <div className="sub">
-                  <span className="tag">{item.source}</span>
+              <div className={s.meta2}>
+                <Text weight="semibold">{item.name}</Text>
+                <span className={s.cmd}>{item.command}</span>
+                <div className={s.sub}>
+                  <span className={s.tag}>{item.source}</span>
                   <span>{item.user}</span>
                 </div>
               </div>
-              <div className="action">
-                <Switch
-                  checked={item.enabled}
-                  disabled={busy.has(key) || item.source === 'Startup folder'}
-                  onChange={() => toggle(item)}
-                />
-              </div>
-            </article>
+              <Switch
+                checked={item.enabled}
+                disabled={busy.has(key) || item.source === 'Startup folder'}
+                onChange={() => toggle(item)}
+              />
+            </Card>
           );
         })}
 
         {filtered.length === 0 && !loading && (
-          <p className="empty">No startup items match.</p>
+          <p className={s.empty}>No startup items match.</p>
         )}
       </div>
     </div>

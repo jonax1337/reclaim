@@ -1,9 +1,30 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FluentProvider, webDarkTheme, webLightTheme } from '@fluentui/react-components';
+import {
+  FluentProvider,
+  SearchBox,
+  Button,
+  Title2,
+  Body1,
+  Tab,
+  TabList,
+  Menu,
+  MenuTrigger,
+  MenuPopover,
+  MenuList,
+  MenuItemCheckbox,
+  makeStyles,
+  shorthands,
+  tokens
+} from '@fluentui/react-components';
+import {
+  Filter20Regular,
+  ArrowClockwise20Regular
+} from '@fluentui/react-icons';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
 import { useSettings } from './lib/stores/settings';
 import { useTweaks } from './lib/stores/tweaks';
+import { micaDarkTheme, micaLightTheme } from './lib/theme/micaTheme';
 import type { ViewKey } from './types';
 
 import { TitleBar } from './lib/components/TitleBar';
@@ -13,11 +34,10 @@ import { TweakCard } from './lib/components/TweakCard';
 import { ApplyBar } from './lib/components/ApplyBar';
 import { PresetChips } from './lib/components/PresetChips';
 import { Toasts } from './lib/components/Toasts';
-import { AppsPanel } from './lib/components/AppsPanel';
+import { Apps } from './lib/components/Apps';
 import { ServiceBrowser } from './lib/components/ServiceBrowser';
 import { SettingsPanel } from './lib/components/SettingsPanel';
 import { ActivityPanel } from './lib/components/ActivityPanel';
-import { AppManager } from './lib/components/AppManager';
 import { StartupApps } from './lib/components/StartupApps';
 import { HardwarePanel } from './lib/components/HardwarePanel';
 import { DriversPanel } from './lib/components/DriversPanel';
@@ -25,7 +45,79 @@ import { ProfilesPanel } from './lib/components/ProfilesPanel';
 import { Skeleton } from './lib/components/Skeleton';
 import { ConfirmDialog } from './lib/components/ConfirmDialog';
 import { CommandPalette } from './lib/components/CommandPalette';
-import { Icon } from './lib/components/Icon';
+
+const useStyles = makeStyles({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: '1 1 auto',
+    minHeight: 0,
+    backgroundColor: 'transparent'
+  },
+  main: {
+    display: 'flex',
+    flex: '1 1 auto',
+    minHeight: 0
+  },
+  content: {
+    flex: '1 1 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: 0,
+    minHeight: 0
+  },
+  top: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: tokens.spacingVerticalM,
+    ...shorthands.padding('32px', '36px', '20px'),
+    flexShrink: 0
+  },
+  h1: {
+    margin: 0,
+    letterSpacing: '-0.2px',
+    color: tokens.colorNeutralForeground1
+  },
+  sub: {
+    display: 'block',
+    marginTop: tokens.spacingVerticalXS,
+    maxWidth: '70ch',
+    color: tokens.colorNeutralForeground2
+  },
+  toolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalS,
+    rowGap: tokens.spacingVerticalS,
+    flexWrap: 'wrap'
+  },
+  search: { flex: 1, minWidth: '200px' },
+  scroll: {
+    flex: '1 1 auto',
+    minHeight: 0,
+    overflowY: 'auto',
+    ...shorthands.padding(0, '36px', '24px'),
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: tokens.spacingVerticalL,
+    scrollBehavior: 'smooth'
+  },
+  presetsRow: { paddingBottom: tokens.spacingVerticalS },
+  grid: { display: 'flex', flexDirection: 'column', rowGap: tokens.spacingVerticalS },
+  empty: {
+    textAlign: 'center',
+    color: tokens.colorNeutralForeground3,
+    ...shorthands.padding('80px', 0),
+    fontSize: tokens.fontSizeBase200
+  },
+  spin: {
+    animationName: { from: { transform: 'rotate(0deg)' }, to: { transform: 'rotate(360deg)' } },
+    animationDuration: '900ms',
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'linear'
+  },
+  segWrap: { marginBottom: tokens.spacingVerticalM }
+});
 
 const titles: Record<ViewKey, string> = {
   dashboard: 'Dashboard',
@@ -38,8 +130,7 @@ const titles: Record<ViewKey, string> = {
   performance: 'Performance',
   gaming: 'Gaming',
   services: 'Services',
-  apps: 'Install Apps',
-  'app-manager': 'App Manager',
+  apps: 'Apps',
   startup: 'Startup Apps',
   hardware: 'Hardware',
   drivers: 'GPU Drivers',
@@ -67,8 +158,7 @@ const subtitles: Record<ViewKey, string> = {
   performance: 'Snappier visuals, fewer background services.',
   gaming: 'Tweaks for full-screen play.',
   services: 'Disable the services you do not need.',
-  apps: 'Curated list installed via winget. Silent & unattended.',
-  'app-manager': "All bundled UWP apps. Remove what you don't use, reinstall what you removed by mistake.",
+  apps: 'Install third-party software via winget, manage installed packages, and clean up Windows Store bloat.',
   startup: 'Programs that run when you log in. Toggle exactly what Task Manager > Startup does.',
   hardware: 'Live snapshot of your system. CPU, GPU, RAM, motherboard, storage.',
   drivers: 'Detected GPU driver versions and one-click installs of vendor updaters.',
@@ -106,6 +196,7 @@ const categoryFor: Partial<Record<ViewKey, string>> = {
 };
 
 export function App() {
+  const styles = useStyles();
   const [view, setView] = useState<ViewKey>('dashboard');
   const [servicesTab, setServicesTab] = useState<'curated' | 'browser'>('curated');
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -131,7 +222,6 @@ export function App() {
   const pendingConfirm = useTweaks((s) => s.pendingConfirm);
   const setPendingConfirm = useTweaks((s) => s.setPendingConfirm);
 
-  // Effective theme — reflects "system"
   const effectiveTheme = useMemo<'dark' | 'light'>(() => {
     if (theme === 'system' && typeof window !== 'undefined') {
       return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
@@ -179,64 +269,79 @@ export function App() {
   const showFilterRow = !!categoryFor[view] || view === 'services';
 
   return (
-    <FluentProvider theme={effectiveTheme === 'light' ? webLightTheme : webDarkTheme} className="fp-root" style={{ background: 'transparent' }}>
+    <FluentProvider theme={effectiveTheme === 'light' ? micaLightTheme : micaDarkTheme} className={styles.root}>
       <TitleBar />
-      <main className="app-main">
+      <main className={styles.main}>
         <Sidebar current={view} onChange={setView} />
-        <section className="content">
-          <header className="top">
+        <section className={styles.content}>
+          <header className={styles.top}>
             <div>
-              <h1>{titles[view]}</h1>
-              {subtitles[view] && <p className="sub">{subtitles[view]}</p>}
+              <Title2 as="h1" className={styles.h1} block>{titles[view]}</Title2>
+              {subtitles[view] && <Body1 className={styles.sub}>{subtitles[view]}</Body1>}
             </div>
             {showFilterRow && (
-              <div className="filter-row">
-                <div className="search">
-                  <Icon name="Search" size={16} />
-                  <input
-                    type="search"
-                    placeholder="Filter tweaks…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-                <button
-                  type="button"
-                  className={`filter-chip${hideApplied ? ' on' : ''}`}
-                  onClick={() => setHideApplied(!hideApplied)}
-                  title="Hide tweaks that are already applied"
+              <div className={styles.toolbar} role="toolbar" aria-label="Tweak filters">
+                <SearchBox
+                  className={styles.search}
+                  placeholder="Filter tweaks…"
+                  value={search}
+                  onChange={(_, d) => setSearch(d.value)}
+                />
+                <Menu
+                  checkedValues={{
+                    filters: [
+                      ...(hideApplied ? ['hideApplied'] : []),
+                      ...(showModifiedOnly ? ['modifiedOnly'] : [])
+                    ]
+                  }}
+                  onCheckedValueChange={(_, data) => {
+                    if (data.name !== 'filters') return;
+                    setHideApplied(data.checkedItems.includes('hideApplied'));
+                    setShowModifiedOnly(data.checkedItems.includes('modifiedOnly'));
+                  }}
                 >
-                  <Icon name="Filter" size={16} /> Hide applied
-                </button>
-                <button
-                  type="button"
-                  className={`filter-chip${showModifiedOnly ? ' on' : ''}`}
-                  onClick={() => setShowModifiedOnly(!showModifiedOnly)}
-                  title="Show only tweaks where some settings differ from the desired state"
-                >
-                  <Icon name="AlertTriangle" size={16} /> Modified only
-                </button>
-                <button
-                  type="button"
-                  className="filter-chip refresh"
+                  <MenuTrigger>
+                    <Button
+                      appearance="outline"
+                      icon={<Filter20Regular />}
+                      title="Filter tweaks"
+                    >
+                      Filter
+                      {(hideApplied || showModifiedOnly) &&
+                        ` · ${(hideApplied ? 1 : 0) + (showModifiedOnly ? 1 : 0)}`}
+                    </Button>
+                  </MenuTrigger>
+                  <MenuPopover>
+                    <MenuList>
+                      <MenuItemCheckbox name="filters" value="hideApplied">
+                        Hide applied
+                      </MenuItemCheckbox>
+                      <MenuItemCheckbox name="filters" value="modifiedOnly">
+                        Modified only
+                      </MenuItemCheckbox>
+                    </MenuList>
+                  </MenuPopover>
+                </Menu>
+                <Button
+                  appearance="outline"
+                  icon={<ArrowClockwise20Regular className={detecting ? styles.spin : undefined} />}
                   onClick={() => void refreshStates()}
                   disabled={detecting}
                   title="Re-scan the system to detect current tweak states"
                 >
-                  <Icon name="RefreshCw" size={16} className={detecting ? 'spin' : ''} />
                   {detecting ? 'Scanning…' : 'Re-scan'}
-                </button>
+                </Button>
               </div>
             )}
           </header>
 
-          <div className="scroll">
+          <div className={styles.scroll}>
             {view === 'dashboard' ? (
               <>
                 <Dashboard />
-                <div className="presets-row"><PresetChips /></div>
+                <div className={styles.presetsRow}><PresetChips /></div>
                 {loading ? <Skeleton count={6} /> : (
-                  <div className="grid">
+                  <div className={styles.grid}>
                     {tweaks.slice(0, 6).map((t) => (
                       <TweakCard
                         key={t.id}
@@ -252,8 +357,7 @@ export function App() {
                 )}
               </>
             ) : view === 'profiles' ? <ProfilesPanel />
-              : view === 'apps' ? <AppsPanel />
-              : view === 'app-manager' ? <AppManager />
+              : view === 'apps' ? <Apps />
               : view === 'startup' ? <StartupApps />
               : view === 'hardware' ? <HardwarePanel />
               : view === 'drivers' ? <DriversPanel />
@@ -261,17 +365,22 @@ export function App() {
               : view === 'activity' ? <ActivityPanel />
               : view === 'services' ? (
               <>
-                <div className="seg" role="tablist">
-                  <button role="tab" aria-selected={servicesTab === 'curated'} className={servicesTab === 'curated' ? 'active' : ''} onClick={() => setServicesTab('curated')}>Curated tweaks</button>
-                  <button role="tab" aria-selected={servicesTab === 'browser'} className={servicesTab === 'browser' ? 'active' : ''} onClick={() => setServicesTab('browser')}>All services</button>
+                <div className={styles.segWrap}>
+                  <TabList
+                    selectedValue={servicesTab}
+                    onTabSelect={(_, d) => setServicesTab(d.value as 'curated' | 'browser')}
+                  >
+                    <Tab value="curated">Curated tweaks</Tab>
+                    <Tab value="browser">All services</Tab>
+                  </TabList>
                 </div>
                 {servicesTab === 'curated' ? (
                   <>
-                    <div className="presets-row"><PresetChips /></div>
+                    <div className={styles.presetsRow}><PresetChips /></div>
                     {loading ? <Skeleton count={4} /> : visibleTweaks.length === 0 ? (
-                      <div className="empty"><p>No service tweaks match your filter.</p></div>
+                      <div className={styles.empty}><p>No service tweaks match your filter.</p></div>
                     ) : (
-                      <div className="grid">
+                      <div className={styles.grid}>
                         {visibleTweaks.map((t) => (
                           <TweakCard
                             key={t.id}
@@ -290,14 +399,18 @@ export function App() {
               </>
             ) : (
               <>
-                <div className="presets-row"><PresetChips /></div>
+                <div className={styles.presetsRow}><PresetChips /></div>
                 {loading ? <Skeleton count={5} /> : visibleTweaks.length === 0 ? (
-                  <div className="empty">
+                  <div className={styles.empty}>
                     <p>No tweaks match your filter in this category.</p>
-                    {search && <button className="link" onClick={() => setSearch('')}>Clear filter</button>}
+                    {search && (
+                      <Button appearance="transparent" onClick={() => setSearch('')}>
+                        Clear filter
+                      </Button>
+                    )}
                   </div>
                 ) : (
-                  <div className="grid">
+                  <div className={styles.grid}>
                     {visibleTweaks.map((t) => (
                       <TweakCard
                         key={t.id}

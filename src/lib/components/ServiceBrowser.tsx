@@ -1,8 +1,26 @@
 import { useEffect, useMemo, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Icon } from './Icon';
+import {
+  Button,
+  SearchBox,
+  Select,
+  TabList,
+  Tab,
+  Caption1,
+  PresenceBadge,
+  Text,
+  Tooltip,
+  makeStyles,
+  mergeClasses,
+  shorthands,
+  tokens
+} from '@fluentui/react-components';
+import {
+  ArrowClockwise16Regular,
+  Play16Regular,
+  Stop16Regular
+} from '@fluentui/react-icons';
 import { useTweaks } from '../stores/tweaks';
-import './ServiceBrowser.css';
 
 interface ServiceInfo {
   name: string;
@@ -16,7 +34,87 @@ type FilterStatus = 'all' | 'running' | 'stopped';
 const startupOptions = ['Automatic', 'Manual', 'Disabled'];
 const filterTabs: FilterStatus[] = ['all', 'running', 'stopped'];
 
+const useStyles = makeStyles({
+  toolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalS,
+    marginBottom: tokens.spacingVerticalS,
+    flexWrap: 'wrap',
+    rowGap: tokens.spacingVerticalS
+  },
+  search: { width: '320px' },
+  spin: {
+    animationName: { from: { transform: 'rotate(0deg)' }, to: { transform: 'rotate(360deg)' } },
+    animationDuration: '900ms',
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'linear'
+  },
+  meta: { color: tokens.colorNeutralForeground3, marginBottom: tokens.spacingVerticalM },
+  table: {
+    backgroundColor: tokens.colorNeutralBackground2,
+    borderRadius: tokens.borderRadiusMedium,
+    overflow: 'hidden',
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2)
+  },
+  thead: {
+    display: 'grid',
+    gridTemplateColumns: '2fr 1fr 1.2fr auto',
+    columnGap: tokens.spacingHorizontalM,
+    ...shorthands.padding(tokens.spacingVerticalSNudge, tokens.spacingHorizontalL),
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
+    borderBottomColor: tokens.colorNeutralStroke2,
+    backgroundColor: tokens.colorNeutralBackground3,
+    color: tokens.colorNeutralForeground3,
+    fontSize: tokens.fontSizeBase200,
+    fontWeight: tokens.fontWeightMedium,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+  row: {
+    display: 'grid',
+    gridTemplateColumns: '2fr 1fr 1.2fr auto',
+    columnGap: tokens.spacingHorizontalM,
+    alignItems: 'center',
+    ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalL),
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
+    borderBottomColor: tokens.colorNeutralStroke2,
+    ':last-child': { borderBottomStyle: 'none' },
+    ':hover': { backgroundColor: tokens.colorNeutralBackground2Hover }
+  },
+  busy: { opacity: 0.55 },
+  ta_r: { textAlign: 'right' },
+  name: { display: 'flex', flexDirection: 'column', rowGap: '2px', minWidth: 0 },
+  id: {
+    fontFamily: tokens.fontFamilyMonospace,
+    fontSize: tokens.fontSizeBase100,
+    color: tokens.colorNeutralForeground3
+  },
+  status: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalXS,
+    color: tokens.colorNeutralForeground2,
+    fontSize: tokens.fontSizeBase200
+  },
+  dot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    backgroundColor: tokens.colorNeutralForeground4
+  },
+  dotRun: { backgroundColor: tokens.colorPaletteGreenForeground1 },
+  empty: {
+    ...shorthands.padding(tokens.spacingVerticalXXL, 0),
+    textAlign: 'center',
+    color: tokens.colorNeutralForeground3
+  }
+});
+
 export function ServiceBrowser() {
+  const s = useStyles();
   const toast = useTweaks((s) => s.toast);
   const [services, setServices] = useState<ServiceInfo[]>([]);
   const [loading, setLoading] = useState(false);
@@ -104,107 +202,87 @@ export function ServiceBrowser() {
   }
 
   return (
-    <div className="service-browser">
-      <div className="toolbar">
-        <div className="search">
-          <Icon name="Search" size={14} />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filter by name or display name…"
-          />
-        </div>
-        <div className="seg" role="tablist">
+    <div>
+      <div className={s.toolbar}>
+        <SearchBox
+          className={s.search}
+          value={query}
+          onChange={(_, d) => setQuery(d.value)}
+          placeholder="Filter by name or display name…"
+        />
+        <TabList
+          selectedValue={filterStatus}
+          onTabSelect={(_, d) => setFilterStatus(d.value as FilterStatus)}
+          size="small"
+        >
           {filterTabs.map((f) => (
-            <button
-              key={f}
-              role="tab"
-              aria-selected={filterStatus === f}
-              className={filterStatus === f ? 'active' : ''}
-              onClick={() => setFilterStatus(f)}
-            >
-              {f}
-            </button>
+            <Tab key={f} value={f} style={{ textTransform: 'capitalize' }}>{f}</Tab>
           ))}
-        </div>
-        <button className="refresh" onClick={() => void load()} title="Reload">
-          <Icon name="RefreshCw" size={14} className={loading ? 'spin' : ''} />
-        </button>
+        </TabList>
+        <Tooltip content="Reload" relationship="label">
+          <Button
+            appearance="subtle"
+            icon={<ArrowClockwise16Regular className={loading ? s.spin : undefined} />}
+            onClick={() => void load()}
+          />
+        </Tooltip>
       </div>
 
-      <p className="meta">
+      <Caption1 className={s.meta}>
         {filtered.length} of {services.length} service{services.length === 1 ? '' : 's'}
-      </p>
+      </Caption1>
 
-      <div className="table">
-        <div className="thead">
+      <div className={s.table}>
+        <div className={s.thead}>
           <span>Service</span>
           <span>Status</span>
           <span>Startup</span>
-          <span className="ta-r">Actions</span>
+          <span className={s.ta_r}>Actions</span>
         </div>
 
-        <div className="tbody">
-          {filtered.map((svc) => {
-            const isRunning = svc.status.toLowerCase() === 'running';
-            const isBusy = busy.has(svc.name);
-            const hasCustomStartup = !startupOptions.includes(svc.startup);
-            return (
-              <div key={svc.name} className={`row${isBusy ? ' busy' : ''}`}>
-                <div className="cell name">
-                  <span className="display">{svc.display_name || svc.name}</span>
-                  <code className="id">{svc.name}</code>
-                </div>
-                <div className="cell">
-                  <span className={`status${isRunning ? ' running' : ''}`}>
-                    <span className="dot" />
-                    {svc.status}
-                  </span>
-                </div>
-                <div className="cell">
-                  <select
-                    value={svc.startup}
-                    disabled={isBusy}
-                    onChange={(e) => void changeStartup(svc, e.currentTarget.value)}
-                  >
-                    {startupOptions.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                    {hasCustomStartup && <option value={svc.startup}>{svc.startup}</option>}
-                  </select>
-                </div>
-                <div className="cell ta-r actions">
-                  {isRunning ? (
-                    <button
-                      className="icon-btn"
-                      disabled={isBusy}
-                      title="Stop"
-                      onClick={() => void stopSvc(svc)}
-                    >
-                      <Icon name="Square" size={12} />
-                    </button>
-                  ) : (
-                    <button
-                      className="icon-btn"
-                      disabled={isBusy}
-                      title="Start"
-                      onClick={() => void startSvc(svc)}
-                    >
-                      <Icon name="Play" size={12} />
-                    </button>
-                  )}
-                </div>
+        {filtered.map((svc) => {
+          const isRunning = svc.status.toLowerCase() === 'running';
+          const isBusy = busy.has(svc.name);
+          const hasCustomStartup = !startupOptions.includes(svc.startup);
+          return (
+            <div key={svc.name} className={mergeClasses(s.row, isBusy && s.busy)}>
+              <div className={s.name}>
+                <Text weight="medium">{svc.display_name || svc.name}</Text>
+                <code className={s.id}>{svc.name}</code>
               </div>
-            );
-          })}
+              <span className={s.status}>
+                <PresenceBadge status={isRunning ? 'available' : 'offline'} size="small" />
+                {svc.status}
+              </span>
+              <Select
+                value={svc.startup}
+                disabled={isBusy}
+                onChange={(_, d) => void changeStartup(svc, d.value)}
+                size="small"
+              >
+                {startupOptions.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+                {hasCustomStartup && <option value={svc.startup}>{svc.startup}</option>}
+              </Select>
+              <span className={s.ta_r}>
+                <Tooltip content={isRunning ? 'Stop' : 'Start'} relationship="label">
+                  <Button
+                    appearance="subtle"
+                    size="small"
+                    icon={isRunning ? <Stop16Regular /> : <Play16Regular />}
+                    disabled={isBusy}
+                    onClick={() => void (isRunning ? stopSvc(svc) : startSvc(svc))}
+                  />
+                </Tooltip>
+              </span>
+            </div>
+          );
+        })}
 
-          {filtered.length === 0 && !loading && (
-            <p className="empty">No services match your filter.</p>
-          )}
-        </div>
+        {filtered.length === 0 && !loading && (
+          <p className={s.empty}>No services match your filter.</p>
+        )}
       </div>
     </div>
   );

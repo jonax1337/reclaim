@@ -35,6 +35,8 @@ pub fn run() {
             commands::system_info,
             commands::list_winget_apps,
             commands::install_winget_app,
+            commands::list_winget_installed,
+            commands::upgrade_winget_app,
             commands::list_services,
             commands::set_service_startup,
             commands::start_service,

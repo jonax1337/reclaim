@@ -4,7 +4,8 @@ use crate::backup::{self, TweakBackup};
 use crate::catalog::{self, ServiceStartup, Tweak};
 use crate::error::{AppError, AppResult};
 use crate::{appx, detect, drivers, hardware, inventory, powershell, profiles, registry, services, startup, system};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct TweakState {
@@ -444,6 +445,78 @@ pub fn install_winget_app(id: String) -> AppResult<()> {
     if !out.status.success() {
         return Err(AppError::Other(format!(
             "winget exit {}: {}",
+            out.status.code().unwrap_or(-1),
+            String::from_utf8_lossy(&out.stderr)
+        )));
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn list_winget_installed() -> AppResult<HashSet<String>> {
+    let temp = std::env::temp_dir().join(format!("reclaim-winget-{}.json", std::process::id()));
+    let temp_str = temp.to_string_lossy().to_string();
+    let out = std::process::Command::new("winget.exe")
+        .args([
+            "export",
+            "--output",
+            &temp_str,
+            "--accept-source-agreements",
+            "--include-versions",
+        ])
+        .output()?;
+    if !out.status.success() {
+        let _ = std::fs::remove_file(&temp);
+        return Err(AppError::Other(format!(
+            "winget export failed: {}",
+            String::from_utf8_lossy(&out.stderr)
+        )));
+    }
+    let json = std::fs::read_to_string(&temp).unwrap_or_default();
+    let _ = std::fs::remove_file(&temp);
+
+    #[derive(Deserialize)]
+    struct Export {
+        #[serde(rename = "Sources", default)]
+        sources: Vec<Source>,
+    }
+    #[derive(Deserialize)]
+    struct Source {
+        #[serde(rename = "Packages", default)]
+        packages: Vec<Package>,
+    }
+    #[derive(Deserialize)]
+    struct Package {
+        #[serde(rename = "PackageIdentifier")]
+        id: String,
+    }
+
+    let export: Export = serde_json::from_str(&json).unwrap_or(Export { sources: vec![] });
+    let set: HashSet<String> = export
+        .sources
+        .into_iter()
+        .flat_map(|s| s.packages)
+        .map(|p| p.id)
+        .collect();
+    Ok(set)
+}
+
+#[tauri::command]
+pub fn upgrade_winget_app(id: String) -> AppResult<()> {
+    let out = std::process::Command::new("winget.exe")
+        .args([
+            "upgrade",
+            "--id",
+            &id,
+            "--exact",
+            "--silent",
+            "--accept-package-agreements",
+            "--accept-source-agreements",
+        ])
+        .output()?;
+    if !out.status.success() {
+        return Err(AppError::Other(format!(
+            "winget upgrade exit {}: {}",
             out.status.code().unwrap_or(-1),
             String::from_utf8_lossy(&out.stderr)
         )));

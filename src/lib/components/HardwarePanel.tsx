@@ -1,8 +1,26 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  Card,
+  Button,
+  Title3,
+  Caption1,
+  Badge,
+  Spinner,
+  makeStyles,
+  mergeClasses,
+  shorthands,
+  tokens
+} from '@fluentui/react-components';
+import {
+  DeveloperBoard20Regular,
+  Ram20Regular,
+  Desktop20Regular,
+  Server20Regular,
+  HardDrive20Regular,
+  ArrowClockwise16Regular
+} from '@fluentui/react-icons';
 import { invoke } from '@tauri-apps/api/core';
-import { Icon } from './Icon';
 import { useTweaks } from '../stores/tweaks';
-import './HardwarePanel.css';
 
 interface HardwareInfo {
   cpu: any;
@@ -14,13 +32,105 @@ interface HardwareInfo {
 }
 
 function vendorColor(v: string) {
-  if (v === 'NVIDIA') return '#76b900';
-  if (v === 'AMD') return '#ed1c24';
-  if (v === 'Intel') return '#0071c5';
-  return 'var(--accent-default)';
+  if (v === 'NVIDIA') return 'success';
+  if (v === 'AMD') return 'danger';
+  if (v === 'Intel') return 'informative';
+  return 'subtle';
 }
 
+const useStyles = makeStyles({
+  toolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    columnGap: tokens.spacingHorizontalS,
+    marginBottom: tokens.spacingVerticalM,
+    flexWrap: 'wrap',
+    rowGap: tokens.spacingVerticalS
+  },
+  spin: {
+    animationName: { from: { transform: 'rotate(0deg)' }, to: { transform: 'rotate(360deg)' } },
+    animationDuration: '900ms',
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'linear'
+  },
+  loading: { display: 'inline-flex', alignItems: 'center', columnGap: tokens.spacingHorizontalS, color: tokens.colorNeutralForeground3 },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+    gap: tokens.spacingHorizontalL
+  },
+  card: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: tokens.spacingVerticalS,
+    ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalL),
+    backgroundColor: tokens.colorNeutralBackground2
+  },
+  span2: { gridColumn: 'span 2' },
+  cardHead: {
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalS,
+    color: tokens.colorNeutralForeground3
+  },
+  cardTitle: { margin: 0 },
+  big: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1
+  },
+  dl: {
+    display: 'grid',
+    gridTemplateColumns: 'auto 1fr',
+    columnGap: tokens.spacingHorizontalL,
+    rowGap: tokens.spacingVerticalXS,
+    margin: 0,
+    marginTop: tokens.spacingVerticalXS
+  },
+  dt: { color: tokens.colorNeutralForeground3, fontSize: tokens.fontSizeBase200 },
+  dd: { margin: 0, color: tokens.colorNeutralForeground1, fontSize: tokens.fontSizeBase200 },
+  modlist: {
+    listStyle: 'none',
+    margin: 0,
+    padding: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: tokens.spacingVerticalXS
+  },
+  modItem: {
+    display: 'grid',
+    gridTemplateColumns: 'auto auto 1fr auto',
+    columnGap: tokens.spacingHorizontalM,
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    ...shorthands.padding(tokens.spacingVerticalXS, 0)
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: tokens.fontSizeBase200,
+    '& th': {
+      textAlign: 'left',
+      ...shorthands.padding(tokens.spacingVerticalSNudge, tokens.spacingHorizontalM),
+      fontWeight: tokens.fontWeightMedium,
+      color: tokens.colorNeutralForeground3,
+      borderBottomWidth: '1px',
+      borderBottomStyle: 'solid',
+      borderBottomColor: tokens.colorNeutralStroke2
+    },
+    '& td': {
+      ...shorthands.padding(tokens.spacingVerticalS, tokens.spacingHorizontalM),
+      borderBottomWidth: '1px',
+      borderBottomStyle: 'solid',
+      borderBottomColor: tokens.colorNeutralStroke2,
+      color: tokens.colorNeutralForeground1
+    }
+  }
+});
+
 export function HardwarePanel() {
+  const s = useStyles();
   const toast = useTweaks((s) => s.toast);
   const [info, setInfo] = useState<HardwareInfo | null>(null);
   const [loading, setLoading] = useState(false);
@@ -43,125 +153,117 @@ export function HardwarePanel() {
   }, []);
 
   return (
-    <div className="hardware-panel">
-      <div className="hdr">
-        <p className="lede">Live snapshot from WMI / Get-PhysicalDisk. No data leaves your machine.</p>
-        <button className="refresh" onClick={() => void load()}>
-          <Icon name="RefreshCw" size={13} className={loading ? 'spin' : ''} /> Reload
-        </button>
+    <div>
+      <div className={s.toolbar}>
+        <Button
+          appearance="outline"
+          icon={<ArrowClockwise16Regular className={loading ? s.spin : undefined} />}
+          onClick={() => void load()}
+        >
+          Reload
+        </Button>
       </div>
 
       {!info ? (
-        <p className="loading">Reading hardware…</p>
+        <span className={s.loading}><Spinner size="tiny" /> Reading hardware…</span>
       ) : (
-        <div className="grid">
+        <div className={s.grid}>
           {info.cpu && (
-            <section className="card cpu">
-              <header>
-                <Icon name="Cpu" size={14} />
-                <h3>Processor</h3>
-              </header>
-              <strong className="big">{info.cpu.name}</strong>
-              <dl>
-                <dt>Cores / Threads</dt>
-                <dd>{info.cpu.cores} / {info.cpu.threads}</dd>
-                <dt>Max clock</dt>
-                <dd>{(info.cpu.max_clock_mhz / 1000).toFixed(2)} GHz</dd>
-                <dt>Socket</dt>
-                <dd>{info.cpu.socket}</dd>
+            <Card className={s.card} appearance="filled-alternative">
+              <div className={s.cardHead}>
+                <DeveloperBoard20Regular />
+                <Title3 as="h3" className={s.cardTitle}>Processor</Title3>
+              </div>
+              <span className={s.big}>{info.cpu.name}</span>
+              <dl className={s.dl}>
+                <dt className={s.dt}>Cores / Threads</dt>
+                <dd className={s.dd}>{info.cpu.cores} / {info.cpu.threads}</dd>
+                <dt className={s.dt}>Max clock</dt>
+                <dd className={s.dd}>{(info.cpu.max_clock_mhz / 1000).toFixed(2)} GHz</dd>
+                <dt className={s.dt}>Socket</dt>
+                <dd className={s.dd}>{info.cpu.socket}</dd>
               </dl>
-            </section>
+            </Card>
           )}
 
           {info.memory && (
-            <section className="card">
-              <header>
-                <Icon name="MemoryStick" size={14} />
-                <h3>Memory</h3>
-              </header>
-              <strong className="big">{info.memory.total_gb} GB total</strong>
+            <Card className={s.card} appearance="filled-alternative">
+              <div className={s.cardHead}>
+                <Ram20Regular />
+                <Title3 as="h3" className={s.cardTitle}>Memory</Title3>
+              </div>
+              <span className={s.big}>{info.memory.total_gb} GB total</span>
               {info.memory.modules.length > 0 && (
-                <ul className="modlist">
+                <ul className={s.modlist}>
                   {info.memory.modules.map((m: any, i: number) => (
-                    <li key={`${m.bank}-${i}`}>
-                      <span className="bank">{m.bank}</span>
-                      <span className="cap">{m.capacity_gb} GB</span>
-                      {m.speed_mhz > 0 ? <span className="speed">{m.speed_mhz} MT/s</span> : <span />}
-                      {m.manufacturer ? <span className="mfr">{m.manufacturer}</span> : <span />}
+                    <li key={`${m.bank}-${i}`} className={s.modItem}>
+                      <span>{m.bank}</span>
+                      <span>{m.capacity_gb} GB</span>
+                      <span>{m.speed_mhz > 0 ? `${m.speed_mhz} MT/s` : ''}</span>
+                      <span>{m.manufacturer || ''}</span>
                     </li>
                   ))}
                 </ul>
               )}
-            </section>
+            </Card>
           )}
 
           {info.gpus.map((gpu: any) => (
-            <section
-              className="card"
-              key={gpu.name}
-              style={{ ['--c' as any]: vendorColor(gpu.vendor) } as CSSProperties}
-            >
-              <header>
-                <Icon name="Monitor" size={14} />
-                <h3>Graphics</h3>
-                <span className="vendor-pill" style={{ ['--c' as any]: vendorColor(gpu.vendor) } as CSSProperties}>
-                  {gpu.vendor}
-                </span>
-              </header>
-              <strong className="big">{gpu.name}</strong>
-              <dl>
+            <Card key={gpu.name} className={s.card} appearance="filled-alternative">
+              <div className={s.cardHead}>
+                <Desktop20Regular />
+                <Title3 as="h3" className={s.cardTitle}>Graphics</Title3>
+                <Badge appearance="tint" color={vendorColor(gpu.vendor) as 'success'}>{gpu.vendor}</Badge>
+              </div>
+              <span className={s.big}>{gpu.name}</span>
+              <dl className={s.dl}>
                 {gpu.vram_gb > 0 && (
                   <>
-                    <dt>VRAM</dt>
-                    <dd>{gpu.vram_gb} GB</dd>
+                    <dt className={s.dt}>VRAM</dt>
+                    <dd className={s.dd}>{gpu.vram_gb} GB</dd>
                   </>
                 )}
-                <dt>Driver</dt>
-                <dd>{gpu.driver_version}</dd>
-                <dt>Driver date</dt>
-                <dd>{gpu.driver_date || '—'}</dd>
+                <dt className={s.dt}>Driver</dt>
+                <dd className={s.dd}>{gpu.driver_version}</dd>
+                <dt className={s.dt}>Driver date</dt>
+                <dd className={s.dd}>{gpu.driver_date || '—'}</dd>
               </dl>
-            </section>
+            </Card>
           ))}
 
           {info.motherboard && (
-            <section className="card">
-              <header>
-                <Icon name="Server" size={14} />
-                <h3>Motherboard</h3>
-              </header>
-              <strong className="big">{info.motherboard.product}</strong>
-              <dl>
-                <dt>Manufacturer</dt>
-                <dd>{info.motherboard.manufacturer}</dd>
+            <Card className={s.card} appearance="filled-alternative">
+              <div className={s.cardHead}>
+                <Server20Regular />
+                <Title3 as="h3" className={s.cardTitle}>Motherboard</Title3>
+              </div>
+              <span className={s.big}>{info.motherboard.product}</span>
+              <dl className={s.dl}>
+                <dt className={s.dt}>Manufacturer</dt>
+                <dd className={s.dd}>{info.motherboard.manufacturer}</dd>
                 {info.bios && (
                   <>
-                    <dt>BIOS vendor</dt>
-                    <dd>{info.bios.vendor}</dd>
-                    <dt>BIOS version</dt>
-                    <dd>{info.bios.version}</dd>
-                    <dt>BIOS date</dt>
-                    <dd>{info.bios.release_date || '—'}</dd>
+                    <dt className={s.dt}>BIOS vendor</dt>
+                    <dd className={s.dd}>{info.bios.vendor}</dd>
+                    <dt className={s.dt}>BIOS version</dt>
+                    <dd className={s.dd}>{info.bios.version}</dd>
+                    <dt className={s.dt}>BIOS date</dt>
+                    <dd className={s.dd}>{info.bios.release_date || '—'}</dd>
                   </>
                 )}
               </dl>
-            </section>
+            </Card>
           )}
 
           {info.disks.length > 0 && (
-            <section className="card span2">
-              <header>
-                <Icon name="HardDrive" size={14} />
-                <h3>Storage</h3>
-              </header>
-              <table>
+            <Card className={mergeClasses(s.card, s.span2)} appearance="filled-alternative">
+              <div className={s.cardHead}>
+                <HardDrive20Regular />
+                <Title3 as="h3" className={s.cardTitle}>Storage</Title3>
+              </div>
+              <table className={s.table}>
                 <thead>
-                  <tr>
-                    <th>Model</th>
-                    <th>Size</th>
-                    <th>Type</th>
-                    <th>Bus</th>
-                  </tr>
+                  <tr><th>Model</th><th>Size</th><th>Type</th><th>Bus</th></tr>
                 </thead>
                 <tbody>
                   {info.disks.map((d: any, i: number) => (
@@ -174,7 +276,8 @@ export function HardwarePanel() {
                   ))}
                 </tbody>
               </table>
-            </section>
+              <Caption1>{info.disks.length} disk{info.disks.length === 1 ? '' : 's'} attached</Caption1>
+            </Card>
           )}
         </div>
       )}

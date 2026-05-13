@@ -1,37 +1,68 @@
-import './Toasts.css';
-import { Icon } from './Icon';
+import { useEffect, useRef } from 'react';
+import {
+  Toaster,
+  Toast,
+  ToastTitle,
+  ToastBody,
+  useToastController,
+  Link
+} from '@fluentui/react-components';
 import { useTweaks } from '../stores/tweaks';
 
-export function Toasts() {
-  const toasts = useTweaks((s) => s.toasts);
-  const dismissToast = useTweaks((s) => s.dismissToast);
+const TOASTER_ID = 'reclaim-toaster';
 
+function ToastDispatcher() {
+  const { dispatchToast, dismissToast } = useToastController(TOASTER_ID);
+  const toasts = useTweaks((s) => s.toasts);
+  const seen = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    const currentIds = new Set(toasts.map((t) => t.id));
+    // Dispatch any new toasts
+    for (const t of toasts) {
+      if (seen.current.has(t.id)) continue;
+      seen.current.add(t.id);
+      const intent =
+        t.kind === 'ok'  ? 'success' :
+        t.kind === 'err' ? 'error'   :
+        'info';
+      dispatchToast(
+        <Toast>
+          <ToastTitle
+            action={
+              t.action ? (
+                <Link onClick={() => { void t.action!.run(); }}>
+                  {t.action.label}
+                </Link>
+              ) : undefined
+            }
+          >
+            {t.msg}
+          </ToastTitle>
+        </Toast>,
+        { intent, toastId: String(t.id), timeout: t.action ? -1 : 4000 }
+      );
+    }
+    // Dismiss toasts no longer in the store
+    for (const id of seen.current) {
+      if (!currentIds.has(id)) {
+        dismissToast(String(id));
+        seen.current.delete(id);
+      }
+    }
+  }, [toasts, dispatchToast, dismissToast]);
+
+  return null;
+}
+
+export function Toasts() {
   return (
-    <div className="toasts" aria-live="polite">
-      {toasts.map((t) => (
-        <div key={t.id} className={`toast ${t.kind}`}>
-          <span className="toast-icon">
-            {t.kind === 'ok' ? <Icon name="CheckCircle2" size={16} />
-              : t.kind === 'err' ? <Icon name="XCircle" size={16} />
-              : <Icon name="Info" size={16} />}
-          </span>
-          <span className="toast-msg">{t.msg}</span>
-          {t.action && (
-            <button
-              className="toast-action"
-              onClick={async () => {
-                await t.action!.run();
-                dismissToast(t.id);
-              }}
-            >
-              {t.action.label}
-            </button>
-          )}
-          <button className="toast-dismiss" aria-label="Dismiss" onClick={() => dismissToast(t.id)}>
-            <Icon name="X" size={12} />
-          </button>
-        </div>
-      ))}
-    </div>
+    <>
+      <ToastDispatcher />
+      <Toaster toasterId={TOASTER_ID} position="bottom-end" />
+    </>
   );
 }
+
+// ToastBody re-export to keep tree-shake friendly imports for callers if any later
+export { ToastBody };

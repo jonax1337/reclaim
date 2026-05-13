@@ -13,6 +13,7 @@
   "dependencies": {
     "@fluentui/react-components": "^9.56.0",
     "@fluentui/react-icons": "^2.0.260",
+    "@fluentui/react-nav-preview": "^0.13.9",
     "@griffel/react": "^1.5.22",
     "@tauri-apps/api": "^2.1.1",
     "@tauri-apps/plugin-dialog": "^2.0.1",

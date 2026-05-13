@@ -1,12 +1,93 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import {
+  Card,
+  Button,
+  Title3,
+  Body1,
+  Caption1,
+  Spinner,
+  Text,
+  makeStyles,
+  shorthands,
+  tokens
+} from '@fluentui/react-components';
 import { Icon } from './Icon';
 import { useTweaks } from '../stores/tweaks';
 import type { FluentIconName } from '../icons';
 import type { Profile } from '../../types';
-import './ProfilesPanel.css';
+
+const useStyles = makeStyles({
+  lede: { display: 'block', maxWidth: '70ch', marginBottom: tokens.spacingVerticalL, color: tokens.colorNeutralForeground2 },
+  status: {
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalS,
+    color: tokens.colorNeutralForeground3,
+    ...shorthands.padding(tokens.spacingVerticalXL, 0)
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+    gap: tokens.spacingHorizontalL
+  },
+  card: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: tokens.spacingVerticalM,
+    ...shorthands.padding(tokens.spacingVerticalL, tokens.spacingHorizontalL),
+    backgroundColor: tokens.colorNeutralBackground2
+  },
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalM
+  },
+  iconWrap: {
+    width: '44px',
+    height: '44px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: tokens.borderRadiusMedium,
+    backgroundColor: tokens.colorBrandBackground2,
+    color: tokens.colorBrandForeground1,
+    flexShrink: 0
+  },
+  titleCol: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', rowGap: '2px' },
+  title: { margin: 0 },
+  ring: {
+    width: '52px',
+    height: '52px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: tokens.fontSizeBase200,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    background: `conic-gradient(${tokens.colorBrandForeground1} var(--pct, 0%), ${tokens.colorNeutralStroke2} 0)`,
+    position: 'relative',
+    flexShrink: 0,
+    ':before': {
+      content: '""',
+      position: 'absolute',
+      inset: '4px',
+      borderRadius: '50%',
+      backgroundColor: tokens.colorNeutralBackground2
+    },
+    '& > span': { position: 'relative', zIndex: 1 }
+  },
+  desc: { color: tokens.colorNeutralForeground2 },
+  actions: {
+    display: 'flex',
+    columnGap: tokens.spacingHorizontalS,
+    marginTop: 'auto'
+  }
+});
 
 export function ProfilesPanel() {
+  const s = useStyles();
   const stateOf = useTweaks((s) => s.stateOf);
   const selected = useTweaks((s) => s.selected);
   const selectProfile = useTweaks((s) => s.selectProfile);
@@ -46,7 +127,6 @@ export function ProfilesPanel() {
 
   function handleSelect(p: Profile) {
     selectProfile(p.tweak_ids);
-    // After selectProfile runs synchronously, read the latest selected size from store.
     const size = useTweaks.getState().selected.size;
     toast({
       kind: 'info',
@@ -71,56 +151,55 @@ export function ProfilesPanel() {
     });
   }
 
-  // Keep `selected` referenced so the summary recomputes when selection updates.
   void selected;
 
   return (
-    <div className="profiles">
-      <p className="profiles-lede">
+    <div>
+      <Body1 className={s.lede}>
         Curated bundles. Click a profile to select every tweak in it; Apply runs them all.
         The progress ring shows how much of the profile is already in place — including changes you made outside this app.
-      </p>
+      </Body1>
 
       {loading && profiles.length === 0 ? (
-        <p className="profiles-status">Loading…</p>
+        <div className={s.status}><Spinner size="tiny" /> <Text>Loading…</Text></div>
       ) : (
-        <div className="profiles-grid">
+        <div className={s.grid}>
           {profiles.map((p) => {
-            const s = summarise(p);
-            const pct = s.total === 0 ? 0 : Math.round((s.applied / s.total) * 100);
+            const stats = summarise(p);
+            const pct = stats.total === 0 ? 0 : Math.round((stats.applied / stats.total) * 100);
             const ringStyle = { '--pct': `${pct}%` } as CSSProperties;
             return (
-              <article className="profile-card" key={p.id}>
-                <header>
-                  <div className="profile-icon-wrap">
+              <Card key={p.id} className={s.card} appearance="filled-alternative">
+                <div className={s.header}>
+                  <div className={s.iconWrap}>
                     <Icon name={p.icon as FluentIconName} size={20} />
                   </div>
-                  <div className="profile-title">
-                    <h3>{p.name}</h3>
-                    <p className="profile-count">{s.applied}/{s.total} applied</p>
+                  <div className={s.titleCol}>
+                    <Title3 as="h3" className={s.title}>{p.name}</Title3>
+                    <Caption1>{stats.applied}/{stats.total} applied</Caption1>
                   </div>
                   <div
-                    className="profile-ring"
+                    className={s.ring}
                     style={ringStyle}
                     title={`${pct}% of this profile is currently applied`}
                   >
-                    {pct}%
+                    <span>{pct}%</span>
                   </div>
-                </header>
-                <p className="profile-desc">{p.description}</p>
-                <div className="profile-actions">
-                  <button className="ghost" onClick={() => handleSelect(p)}>
-                    Select tweaks
-                  </button>
-                  <button
-                    className="primary"
-                    onClick={() => handleApply(p)}
-                    disabled={s.notApplied === 0}
-                  >
-                    {s.notApplied === 0 ? 'Fully applied' : `Apply ${s.notApplied}`}
-                  </button>
                 </div>
-              </article>
+                <Body1 className={s.desc}>{p.description}</Body1>
+                <div className={s.actions}>
+                  <Button appearance="secondary" onClick={() => handleSelect(p)}>
+                    Select tweaks
+                  </Button>
+                  <Button
+                    appearance="primary"
+                    onClick={() => handleApply(p)}
+                    disabled={stats.notApplied === 0}
+                  >
+                    {stats.notApplied === 0 ? 'Fully applied' : `Apply ${stats.notApplied}`}
+                  </Button>
+                </div>
+              </Card>
             );
           })}
         </div>

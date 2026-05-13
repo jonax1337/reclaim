@@ -5,9 +5,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button
+  Button,
+  makeStyles,
+  tokens
 } from '@fluentui/react-components';
-import { Icon } from './Icon';
+import { Warning20Filled } from '@fluentui/react-icons';
 
 type Props = {
   open: boolean;
@@ -20,6 +22,25 @@ type Props = {
   onConfirm: () => void;
 };
 
+const useStyles = makeStyles({
+  titleRow: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    columnGap: tokens.spacingHorizontalS
+  },
+  warnIcon: { color: tokens.colorPaletteYellowForeground1, display: 'inline-flex' },
+  danger: {
+    backgroundColor: tokens.colorPaletteRedBackground3,
+    color: tokens.colorNeutralForegroundOnBrand,
+    ':hover': {
+      backgroundColor: tokens.colorPaletteRedForeground1
+    },
+    ':active': {
+      backgroundColor: tokens.colorPaletteRedForeground2
+    }
+  }
+});
+
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -30,6 +51,8 @@ export function ConfirmDialog({
   cancelLabel = 'Cancel',
   onConfirm
 }: Props) {
+  const s = useStyles();
+
   function handleConfirm() {
     onConfirm();
     onOpenChange(false);
@@ -40,12 +63,8 @@ export function ConfirmDialog({
       <DialogSurface>
         <DialogBody>
           <DialogTitle>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-              {danger && (
-                <span style={{ color: 'var(--warning)', display: 'inline-flex' }}>
-                  <Icon name="AlertTriangle" size={18} />
-                </span>
-              )}
+            <span className={s.titleRow}>
+              {danger && <span className={s.warnIcon}><Warning20Filled /></span>}
               {title}
             </span>
           </DialogTitle>
@@ -58,7 +77,7 @@ export function ConfirmDialog({
               appearance="primary"
               autoFocus
               onClick={handleConfirm}
-              style={danger ? { background: 'var(--danger)', borderColor: 'var(--danger)' } : undefined}
+              className={danger ? s.danger : undefined}
             >
               {confirmLabel}
             </Button>
